@@ -1,0 +1,113 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent = IPGRoad 9.0
+FileCreator = CarMaker 9.0.1
+LibVersion = 9.0.1
+Country = DEU
+nLinks = 1
+nJunctions = 1
+nObjects = 95
+nRoutes = 1
+RoadNetworkLength = 7435.46011277766
+BBox = -650.708432794016 570.492184549891 -428.39029612553 1116.02746913555 -11 11
+Route.0.Length = 7435.46011277766
+RST.Unit = kmh
+RST = 50 100 130 30 70 30 0 -1
+Movie = 0.2 1 0.01 1.5 1.5 1 1
+PathMode = -1
+Junction.0.ID = 85
+Junction.0.Knot = 0 0 0
+Junction.0.RST = urban
+Junction.0.Arm.0.ID = 86
+Junction.0.Arm.0 = 147.55 0 0
+Junction.0.Arm.1.ID = 87
+Junction.0.Arm.1 = 327.55 0 0
+Junction.0.MainArms = 0 1
+Link.0.ID = 0
+Link.0.Junctions = 0 0 0 1
+Link.0.RST = countryroad
+Link.0.RL.ID = 1
+Link.0.Seg.0.ID = 5
+Link.0.Seg.0.Type = Straight
+Link.0.Seg.0.Param = 144.897 0 0 0 0 0 0 0
+Link.0.Seg.1.ID = 58
+Link.0.Seg.1.Type = TurnRight
+Link.0.Seg.1.Param = 1084.342 46.648 0 0 0 0 0 0
+Link.0.Seg.2.ID = 59
+Link.0.Seg.2.Type = ClothRight
+Link.0.Seg.2.Param = 1084.342 76.528 238.754 0 0 0 0 0
+Link.0.Seg.3.ID = 60
+Link.0.Seg.3.Type = ClothLeft
+Link.0.Seg.3.Param = 76.528 187.444 195.934 0 0 0 0 0
+Link.0.Seg.4.ID = 61
+Link.0.Seg.4.Type = PointList
+Link.0.Seg.4.Param = -0.84 0.543 1 0 0 0 0 0
+Link.0.Seg.4.PointList:
+	-1 -1 245.311 973.659
+	-1 -1 504.363 447.199
+	-1 -1 107.429 534.943
+	-1 -1 -5.384 321.852
+	-1 -1 199.35 351.1
+	-1 -1 424.976 146.365
+	-1 -1 295.45 -267.281
+	-1 -1 228.598 -204.607
+	-1 -1 53.112 -246.39
+	-1 -1 -166.943 -388.052
+	-1 -1 -423.236 -293.204
+	-1 -1 -433.326 -115.614
+	-1 -1 -164.925 -65.163
+	-1 -1 55.044 -141.849
+	-1 -1 256.85 -87.361
+	-1 -1 303.265 72.065
+	-1 -1 222.543 195.167
+	-1 -1 123.658 130.589
+	-1 -1 168.055 3.451
+	-1 -1 115.586 -61.127
+	-1 -1 71.188 -40.946
+Link.0.Seg.5.ID = 83
+Link.0.Seg.5.Type = PointList
+Link.0.Seg.5.Param = -0.843860006975502 0.536563405971098 1 0 0 0 0 0
+Link.0.Seg.5.PointList:
+	-1 -1 0 0
+Link.0.LaneSection.0.ID = 6
+Link.0.LaneSection.0.Start = 0
+Link.0.LaneSection.0.LaneL.0.ID = 7
+Link.0.LaneSection.0.LaneL.0 = 0 6 6 0 0 0 0
+Link.0.LaneSection.0.LaneL.0.ARP = 10 11 12 13 14 15
+Link.0.LaneSection.0.LaneL.1.ID = 18
+Link.0.LaneSection.0.LaneL.1 = 0 6 6 4 0 0 0
+Link.0.LaneSection.0.LaneL.1.ARP = 21 22 23 24 25 26
+Link.0.LaneSection.0.LaneL.2.ID = 29
+Link.0.LaneSection.0.LaneL.2 = 0 12.5 12.5 5 0 0 0
+Link.0.LaneSection.0.LaneR.0.ID = 32
+Link.0.LaneSection.0.LaneR.0 = 0 6 6 0 0 0 0
+Link.0.LaneSection.0.LaneR.0.ARP = 35 36 37 38 39 40
+Link.0.LaneSection.0.LaneR.1.ID = 43
+Link.0.LaneSection.0.LaneR.1 = 0 6 6 4 0 0 0
+Link.0.LaneSection.0.LaneR.1.ARP = 46 47 48 49 50 51
+Link.0.LaneSection.0.LaneR.2.ID = 54
+Link.0.LaneSection.0.LaneR.2 = 0 12.5 12.5 5 0 0 0
+LanePath.0 = 16 7 2 10 0.1 0.1
+LanePath.1 = 27 18 0.25 10 0.1 0.1
+LanePath.2 = 41 32 2 10 0.1 0.1
+LanePath.3 = 52 43 0.25 10 0.1 0.1
+Route.0.ID = 93
+Route.0.Name = Route_0
+Route.0.DrvPath.ID = 94
+Route.0.DrvPath:
+	41
+RL.1.RoadMarking.0.ID = 57 6
+RL.1.RoadMarking.0 = 0 0 0 1 0 0 0.15 0 2 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.0.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+RL.1.RoadMarking.1.ID = 53 43
+RL.1.RoadMarking.1 = 0 0 0 1 0 1 0.15 0 1 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.1.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+RL.1.RoadMarking.2.ID = 42 32
+RL.1.RoadMarking.2 = 0 0 0 1 0 1 0.15 0 1 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.2.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+RL.1.RoadMarking.3.ID = 28 18
+RL.1.RoadMarking.3 = 0 0 0 1 0 1 0.15 0 1 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.3.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+RL.1.RoadMarking.4.ID = 17 7
+RL.1.RoadMarking.4 = 0 0 0 1 0 1 0.15 0 1 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.4.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+MaxUsedObjId = 94

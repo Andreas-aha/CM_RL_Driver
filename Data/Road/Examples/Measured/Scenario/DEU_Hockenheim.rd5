@@ -1,0 +1,342 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent = IPGRoad 9.0
+FileCreator = CarMaker 9.0.1
+LibVersion = 9.0.1
+Country = DEU
+nLinks = 1
+nJunctions = 1
+nObjects = 140
+nRoutes = 1
+RoadNetworkLength = 2597.28880247611
+BBox = -214.989948506884 769.848375837184 -393.76273745301 659.035571386757 -12.73 14.0097727297626
+Route.0.Length = 2597.28880247611
+GCS = FlatEarth 0 0 0 49.3285 8.5653 113
+RST.Unit = kmh
+RST = 50 100 -1 30 70 50 -1 -1
+Movie = 0.2 1 0.02 12 12 0.1 0.1
+PathMode = -1
+Junction.0.ID = 2
+Junction.0.Knot = 0 0 0
+Junction.0.RST = urban
+Junction.0.Arm.0.ID = 3
+Junction.0.Arm.0 = 113 0 0
+Junction.0.Arm.1.ID = 28
+Junction.0.Arm.1 = 293 0 0
+Junction.0.MainArms = 0 1
+Junction.0.RL.0.ID = 29
+Junction.0.RL.0 = 0 0 113 0 0 0 113 0
+Junction.0.RL.0.RefObject = 28 3
+Junction.0.RL.0.Seg.0.ID = 32
+Junction.0.RL.0.Seg.0.Type = Connect
+Junction.0.RL.0.Seg.0.Param = 0 0 0 0 0 0 0 0
+Link.0.ID = 4
+Link.0.Junctions = 0 0 0 1
+Link.0.RST = undefined
+Link.0.RL.ID = 5
+Link.0.Seg.0.ID = 6
+Link.0.Seg.0.Type = Straight
+Link.0.Seg.0.Param = 200 0 0 0 0 0 0 0
+Link.0.Seg.1.ID = 7
+Link.0.Seg.1.Type = TurnRight
+Link.0.Seg.1.Param = 68 69 0 0 0 0 0 0
+Link.0.Seg.2.ID = 8
+Link.0.Seg.2.Type = Straight
+Link.0.Seg.2.Param = 220 0 0 0 0 0 0 0
+Link.0.Seg.3.ID = 9
+Link.0.Seg.3.Type = TurnRight
+Link.0.Seg.3.Param = 45 102 0 0 0 0 0 0
+Link.0.Seg.4.ID = 10
+Link.0.Seg.4.Type = TurnRight
+Link.0.Seg.4.Param = 150 35 0 0 0 0 0 0
+Link.0.Seg.5.ID = 11
+Link.0.Seg.5.Type = TurnLeft
+Link.0.Seg.5.Param = 150 35 0 0 0 0 0 0
+Link.0.Seg.6.ID = 12
+Link.0.Seg.6.Type = Straight
+Link.0.Seg.6.Param = 200 0 0 0 0 0 0 0
+Link.0.Seg.7.ID = 13
+Link.0.Seg.7.Type = TurnLeft
+Link.0.Seg.7.Param = 160 47 0 0 0 0 0 0
+Link.0.Seg.8.ID = 14
+Link.0.Seg.8.Type = TurnRight
+Link.0.Seg.8.Param = 160 47 0 0 0 0 0 0
+Link.0.Seg.9.ID = 15
+Link.0.Seg.9.Type = TurnRight
+Link.0.Seg.9.Param = 35 89 0 0 0 0 0 0
+Link.0.Seg.10.ID = 16
+Link.0.Seg.10.Type = Straight
+Link.0.Seg.10.Param = 60 0 0 0 0 0 0 0
+Link.0.Seg.11.ID = 17
+Link.0.Seg.11.Type = TurnRight
+Link.0.Seg.11.Param = 95 84 0 0 0 0 0 0
+Link.0.Seg.12.ID = 18
+Link.0.Seg.12.Type = Straight
+Link.0.Seg.12.Param = 220 0 0 0 0 0 0 0
+Link.0.Seg.13.ID = 19
+Link.0.Seg.13.Type = TurnLeft
+Link.0.Seg.13.Param = 40 155 0 0 0 0 0 0
+Link.0.Seg.14.ID = 20
+Link.0.Seg.14.Type = Straight
+Link.0.Seg.14.Param = 60 0 0 0 0 0 0 0
+Link.0.Seg.15.ID = 21
+Link.0.Seg.15.Type = TurnLeft
+Link.0.Seg.15.Param = 90 52 0 0 0 0 0 0
+Link.0.Seg.16.ID = 22
+Link.0.Seg.16.Type = TurnRight
+Link.0.Seg.16.Param = 100 27 0 0 0 0 0 0
+Link.0.Seg.17.ID = 23
+Link.0.Seg.17.Type = Straight
+Link.0.Seg.17.Param = 45 0 0 0 0 0 0 0
+Link.0.Seg.18.ID = 24
+Link.0.Seg.18.Type = TurnRight
+Link.0.Seg.18.Param = 50 77 0 0 0 0 0 0
+Link.0.Seg.19.ID = 25
+Link.0.Seg.19.Type = Straight
+Link.0.Seg.19.Param = 45 0 0 0 0 0 0 0
+Link.0.Seg.20.ID = 26
+Link.0.Seg.20.Type = TurnRight
+Link.0.Seg.20.Param = 69.525 119 0 0 0 0 0 0
+Link.0.Seg.21.ID = 27
+Link.0.Seg.21.Type = Straight
+Link.0.Seg.21.Param = 280 0 0 0 0 0 0 0
+Link.0.Seg.22.ID = 0
+Link.0.Seg.22.Type = PointList
+Link.0.Seg.22.Param = -0.390731128489274 0.92050485345244 1 0 0 0 0 0
+Link.0.Seg.22.PointList:
+	-1 -1 0 0
+Link.0.LateralCenterLineOffset.ID = 31
+Link.0.LateralCenterLineOffset:
+	148 -1 0 0 0 6 -999 -999 -999
+	149 -1 0 1 0 6 -999 -999 -999
+Link.0.LaneSection.0.ID = 30
+Link.0.LaneSection.0.Start = 0
+Link.0.LaneSection.0.LaneL.0.ID = 33
+Link.0.LaneSection.0.LaneL.0 = 2 10 10 5 0 0 0
+Link.0.LaneSection.0.LaneR.0.ID = 34
+Link.0.LaneSection.0.LaneR.0 = 0 12 12 0 0 0 0
+Link.0.LaneSection.0.LaneR.0.ARP = 206 207 208 209 210 211
+Link.0.LaneSection.0.LaneR.1.ID = 36
+Link.0.LaneSection.0.LaneR.1 = 2 10 10 5 0 0 0
+Link.0.ElevationProfile.ID = 47
+Link.0.ElevationProfile.Params = 0 0
+Link.0.ElevationProfile:
+	150 -1 0 0 0 0 0
+	151 -1 1996.41854505907 0 0 0 0
+	152 -1 2000.41854505907 0 0 -0.02 -0.01
+	153 -1 2041.41854505907 0 0 -0.43 -0.01
+	154 -1 2045.41854505907 0 0 -0.45 0
+	155 -1 2108.61372126085 0 0 -0.45 0
+	156 -1 2112.61372126085 0 0 -0.43 0.01
+	157 -1 2153.61372126085 0 0 -0.02 0.01
+	158 -1 2157.61372126085 0 0 0 0
+	159 -1 2300.01310059229 0 0 0 0
+	160 -1 2598.01310059229 0 0 0 0
+Link.0.SlopeProfile.ID = 59
+Link.0.SlopeProfile.Params = 0 0
+Link.0.SlopeProfile:
+	161 -1 0 0 0 0.01 0
+	162 -1 179.527287874107 0 0 0.01 0
+	163 -1 220.472712125893 0 0 0.03 0
+	164 -1 261.41813637768 0 0 0.03 0
+	165 -1 302.363560629467 0 0 0.02 0
+	166 -1 481.863195336939 0 0 0.02 0
+	167 -1 521.918501670209 0 0 0.03 0
+	168 -1 561.973808003479 0 0 0.03 0
+	169 -1 602.029114336749 0 0 0.02 0
+	170 -1 650.72380046739 0 0 0.02 0
+	171 -1 696.538693332242 0 0 -0.01 0
+	172 -1 742.353586197093 0 0 -0.01 0
+	173 -1 788.168479061944 0 0 0 0
+	174 -1 932.448842692025 0 0 0 0
+	175 -1 998.073222567012 0 0 0 0
+	176 -1 1063.697602442 0 0 0 0
+	177 -1 1129.32198231699 0 0 0.01 0
+	178 -1 1214.16680057956 0 0 0.01 0
+	179 -1 1241.35030367937 0 0 0.01 0
+	180 -1 1268.53380677918 0 0 0.01 0
+	181 -1 1295.71730987899 0 0 0.01 0
+	182 -1 1327.12555832909 0 0 0.01 0
+	183 -1 1357.12555832909 0 0 0.03 0
+	184 -1 1446.58351406095 0 0 0.03 0
+	185 -1 1516.22215121552 0 0 -0.03 0
+	186 -1 1674.35022923232 0 0 -0.03 0
+	187 -1 1728.45543604415 0 0 -0.08 0
+	188 -1 1794.61324626188 0 0 -0.08 0
+	189 -1 1824.61324626188 0 0 -0.05 0
+	190 -1 1854.61324626188 0 0 -0.05 0
+	191 -1 1884.61324626188 0 0 -0.05 0
+	192 -1 1939.51368280426 0 0 -0.05 0
+	193 -1 1963.07562770618 0 0 0.05 0
+	194 -1 1987.16854505907 0 0 0.05 0
+	195 -1 2009.66854505907 0 0 0.05 0
+	196 -1 2032.16854505907 0 0 0.05 0
+	197 -1 2054.66854505907 0 0 0.08 0
+	198 -1 2099.36372126085 0 0 0.08 0
+	199 -1 2121.86372126085 0 0 0.04 0
+	200 -1 2144.36372126085 0 0 0.04 0
+	201 -1 2166.86372126085 0 0 0.04 0
+	202 -1 2263.91325575943 0 0 0.04 0
+	203 -1 2336.11294542515 0 0 0.01 0
+	204 -1 2598.01310059229 0 0 0.01 0
+LanePath.0 = 138 34 2 10 0.1 0.1
+Route.0.ID = 37
+Route.0.Name = Route_0
+Route.0.DrvPath.ID = 38
+Route.0.DrvPath:
+	138
+RL.5.SignPlate.0.ID = 127 5
+RL.5.SignPlate.0 = 100 0 8 -2 0.7 1.2 0 1.5 0 ""
+RL.5.SignPlate.0.Material.0 = Textures/Signs/Sign_Dist100m.png 0 0 0 0 0 0 1 1 0 0 0
+RL.5.SignPlate.1.ID = 128 5
+RL.5.SignPlate.1 = 150 0 8 -2 0.7 1.2 0 1.5 0 ""
+RL.5.SignPlate.1.Material.0 = Textures/Signs/Sign_Dist50m.png 0 0 0 0 0 0 1 1 0 0 0
+RL.5.SignPlate.2.ID = 129 5
+RL.5.SignPlate.2 = 281.890848503574 0 -8 -2 1.25 1 0 1.5 0 ""
+RL.5.SignPlate.2.Material.0 = Textures/IPG/Logo_IPG_03.png 0 0 0 0 0 0 1 1 0 0 0
+RL.5.RoadMarking.0.ID = 133 5
+RL.5.RoadMarking.0 = 0 0 0 1 -0.1 1 0.5 0 1 0 0 5 0 1 1 4 ""
+RL.5.RoadMarking.1.ID = 134 5
+RL.5.RoadMarking.1 = 0 0 0 1 0.1 -1 0.5 0 1 0 0 5 0 1 1 4 ""
+RL.5.Marker.0.ID = 124 5
+RL.5.Marker.0.Type = DrivManTrigger
+RL.5.Marker.0.Param = 600 0 1 3 1
+RL.5.Marker.1.ID = 125 5
+RL.5.Marker.1.Type = DrivManTrigger
+RL.5.Marker.1.Param = 1200 0 1 3 2
+RL.5.Marker.2.ID = 126 5
+RL.5.Marker.2.Type = DrivManTrigger
+RL.5.Marker.2.Param = 2400 0 1 3 3
+RL.5.Bump.0.ID = 105 5
+RL.5.Bump.0.Type = LatProfileRSR
+RL.5.Bump.0.Param = 190 0 282 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.0.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.0.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.1.ID = 106 5
+RL.5.Bump.1.Type = LatProfileRSL
+RL.5.Bump.1.Param = 252 0 402 0 0 1 0 0 2 0 2 0
+RL.5.Bump.1.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.1.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.2.ID = 107 5
+RL.5.Bump.2.Type = LatProfileRSR
+RL.5.Bump.2.Param = 487 0 607 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.2.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.2.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.3.ID = 108 5
+RL.5.Bump.3.Type = LatProfileRSL
+RL.5.Bump.3.Param = 649 0 759 0 0 1 0 0 2 0 2 0
+RL.5.Bump.3.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.3.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.4.ID = 109 5
+RL.5.Bump.4.Type = LatProfileRSR
+RL.5.Bump.4.Param = 780 0 890 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.4.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.4.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.5.ID = 110 5
+RL.5.Bump.5.Type = LatProfileRSL
+RL.5.Bump.5.Param = 960 0 1102 0 0 1 0 0 2 0 2 0
+RL.5.Bump.5.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.5.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.6.ID = 111 5
+RL.5.Bump.6.Type = LatProfileRSR
+RL.5.Bump.6.Param = 1112 0 1282 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.6.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.6.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.7.ID = 112 5
+RL.5.Bump.7.Type = LatProfileRSL
+RL.5.Bump.7.Param = 1247 0 1322 0 0 1 0 0 2 0 2 0
+RL.5.Bump.7.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.7.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.8.ID = 113 5
+RL.5.Bump.8.Type = LatProfileRSR
+RL.5.Bump.8.Param = 1367 0 1507 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.8.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.8.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.9.ID = 114 5
+RL.5.Bump.9.Type = LatProfileRSL
+RL.5.Bump.9.Param = 1451 0 1551 0 0 1 0 0 2 0 2 0
+RL.5.Bump.9.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.9.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.10.ID = 115 5
+RL.5.Bump.10.Type = LatProfileRSL
+RL.5.Bump.10.Param = 1697 0 1802 0 0 1 0 0 2 0 2 0
+RL.5.Bump.10.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.10.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.11.ID = 116 5
+RL.5.Bump.11.Type = LatProfileRSR
+RL.5.Bump.11.Param = 1795 0 1880 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.11.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.11.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.12.ID = 117 5
+RL.5.Bump.12.Type = LatProfileRSL
+RL.5.Bump.12.Param = 1880 0 1955 0 0 1 0 0 2 0 2 0
+RL.5.Bump.12.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.12.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.13.ID = 118 5
+RL.5.Bump.13.Type = LatProfileRSR
+RL.5.Bump.13.Param = 1956 0 2006 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.13.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.13.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.14.ID = 119 5
+RL.5.Bump.14.Type = LatProfileRSL
+RL.5.Bump.14.Param = 2013 0 2058 0 0 1 0 0 2 0 2 0
+RL.5.Bump.14.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 1 0 0 0 0
+RL.5.Bump.14.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.15.ID = 120 5
+RL.5.Bump.15.Type = LatProfileRSR
+RL.5.Bump.15.Param = 2045 0 2103 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.15.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.15.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.16.ID = 121 5
+RL.5.Bump.16.Type = LatProfileRSL
+RL.5.Bump.16.Param = 2086 0 2151 0 0 1 0 0 2 0 2 0
+RL.5.Bump.16.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.16.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.17.ID = 122 5
+RL.5.Bump.17.Type = LatProfileRSR
+RL.5.Bump.17.Param = 2149 0 2289 0 0 -1 1 0 2 0 2 0
+RL.5.Bump.17.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.17.Profile:
+	1.2 0.15
+	0.3 0.15
+RL.5.Bump.18.ID = 123 5
+RL.5.Bump.18.Type = LatProfileRSL
+RL.5.Bump.18.Param = 2275 0 2425 0 0 1 0 0 2 0 2 0
+RL.5.Bump.18.Material.0 = Textures/Ground/Curb_RedWhite.png 0 0 0 0 0 0 0.5 0 0 0 0
+RL.5.Bump.18.Profile:
+	1.2 0.15
+	0.3 0.15
+MaxUsedObjId = 211
