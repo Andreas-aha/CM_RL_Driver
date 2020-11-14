@@ -1,0 +1,141 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent = IPGRoad 9.0
+FileCreator = CarMaker 9.0.1
+LibVersion = 9.0.1
+Country = DEU
+nLinks = 1
+nJunctions = 1
+nObjects = 97
+nRoutes = 1
+RoadNetworkLength = 416.896519928043
+BBox = -233.817375508767 328.182624491232 -281.256129504892 280.743870495108 -18.9595341573736 19.1
+Route.0.Length = 416.896519928043
+RST.Unit = kmh
+RST = 50 100 130 30 70 30 0 -1
+Movie = 0.2 1 0.01 1.5 1.5 1 1
+Movie.TerrainFName = 3D/Terrain/IPG_DEU_Nurburgring_RoadFeatures.obj
+PathMode = -1
+Junction.0.ID = 68
+Junction.0.Knot = 0 0 0
+Junction.0.RST = urban
+Junction.0.Arm.0.ID = 69
+Junction.0.Arm.0 = 0 0 0
+Junction.0.Arm.1.ID = 70
+Junction.0.Arm.1 = 180 0 0
+Junction.0.MainArms = 0 1
+Link.0.ID = 0
+Link.0.Junctions = 0 0 0 1
+Link.0.RST = countryroad
+Link.0.RL.ID = 1
+Link.0.Seg.0.ID = 5
+Link.0.Seg.0.Type = Straight
+Link.0.Seg.0.Param = 100 0 0 0 0 0 0 0
+Link.0.Seg.1.ID = 56
+Link.0.Seg.1.Type = TurnRight
+Link.0.Seg.1.Param = 20 180 0 0 0 0 0 0
+Link.0.Seg.2.ID = 57
+Link.0.Seg.2.Type = Straight
+Link.0.Seg.2.Param = 45 0 0 0 0 0 0 0
+Link.0.Seg.3.ID = 58
+Link.0.Seg.3.Type = TurnRight
+Link.0.Seg.3.Param = 10 90 0 0 0 0 0 0
+Link.0.Seg.4.ID = 59
+Link.0.Seg.4.Type = Straight
+Link.0.Seg.4.Param = 57.875 0 0 0 0 0 0 0
+Link.0.Seg.5.ID = 60
+Link.0.Seg.5.Type = TurnLeft
+Link.0.Seg.5.Param = 20 90 0 0 0 0 0 0
+Link.0.Seg.6.ID = 61
+Link.0.Seg.6.Type = Straight
+Link.0.Seg.6.Param = 25 0 0 0 0 0 0 0
+Link.0.Seg.7.ID = 62
+Link.0.Seg.7.Type = ClothLeft
+Link.0.Seg.7.Param = 100000 14.177 38.043 0 0 0 0 0
+Link.0.Seg.8.ID = 63
+Link.0.Seg.8.Type = ClothLeft
+Link.0.Seg.8.Param = 14.177 35.247 74.544 0 0 0 0 0
+Link.0.Seg.9.ID = 64
+Link.0.Seg.9.Type = ClothRight
+Link.0.Seg.9.Param = 35.247 25.168 15.579 0 0 0 0 0
+Link.0.Seg.10.ID = 65
+Link.0.Seg.10.Type = TurnLeft
+Link.0.Seg.10.Param = 13.337 88.502 0 0 0 0 0 0
+Link.0.Seg.11.ID = 66
+Link.0.Seg.11.Type = PointList
+Link.0.Seg.11.Param = 1 0 1 0 0 0 0 0
+Link.0.Seg.11.PointList:
+	-1 -1 0 0
+Link.0.LaneSection.0.ID = 6
+Link.0.LaneSection.0.Start = 0
+Link.0.LaneSection.0.LaneL.0.ID = 7
+Link.0.LaneSection.0.LaneL.0 = 0 3.5 3.5 0 0 0 0
+Link.0.LaneSection.0.LaneL.0.ARP = 10 11 12 13 14 15
+Link.0.LaneSection.0.LaneL.1.ID = 18
+Link.0.LaneSection.0.LaneL.1 = 0 1 1 4 0 0 0
+Link.0.LaneSection.0.LaneL.1.ARP = 21 22 23 24 25 26
+Link.0.LaneSection.0.LaneL.2.ID = 28
+Link.0.LaneSection.0.LaneL.2 = 0 2.5 2.5 5 0 0 0
+Link.0.LaneSection.0.LaneR.0.ID = 31
+Link.0.LaneSection.0.LaneR.0 = 0 3.5 3.5 0 0 0 0
+Link.0.LaneSection.0.LaneR.0.ARP = 34 35 36 37 38 39
+Link.0.LaneSection.0.LaneR.0.Width:
+	75 -1 100 0 0 5 -999 -999 -999
+	74 -1 200 0 0 7 -999 -999 -999
+	76 -1 250 0 0 5 -999 -999 -999
+	77 -1 300 0 0 4 -999 -999 -999
+	78 -1 350 0 0 8 -999 -999 -999
+Link.0.LaneSection.0.LaneR.1.ID = 42
+Link.0.LaneSection.0.LaneR.1 = 0 3 3 4 0 0 0
+Link.0.LaneSection.0.LaneR.1.ARP = 45 46 47 48 49 50
+Link.0.LaneSection.0.LaneR.2.ID = 52
+Link.0.LaneSection.0.LaneR.2 = 0 2.5 2.5 5 0 0 0
+Link.0.ElevationProfile.ID = 2
+Link.0.ElevationProfile.Params = 0 0
+Link.0.ElevationProfile:
+	83 -1 65.865 0 0 0 -999
+	84 -1 81.824 0 0 2 -999
+	85 -1 99.73 0 0 0 -999
+	82 -1 225.437 0 0 0 -999
+	79 -1 242.109 0 0 5 -999
+	80 -1 269.301 0 0 5 -999
+	81 -1 322.592 0 0 0 -999
+LanePath.0 = 16 7 2 10 0.1 0.1
+LanePath.1 = 27 18 0.25 10 0.1 0.1
+LanePath.2 = 40 31 2 10 0.1 0.1
+LanePath.3 = 51 42 0.25 10 0.1 0.1
+Route.0.ID = 95
+Route.0.Name = Route_0
+Route.0.DrvPath.ID = 96
+Route.0.DrvPath:
+	40
+RL.1.RoadBridge.0.ID = 86 1
+RL.1.RoadBridge.0 = 225.049 0 320.274 0 5.5 0.5 0.5 0 0 Standard "" Type1 Type1
+RL.1.RoadBridge.0.Material.0 = Textures/Infrastructure/Concrete_01.jpg 0 0 0 0 0 0 1 1 0 0 0
+RL.1.GuidePost.0.ID = 87 1
+RL.1.GuidePost.0 = 0.549 0 204.821 0 0.5 1 50
+RL.1.GuidePost.1.ID = 88 1
+RL.1.GuidePost.1 = 0.549 0 204.821 0 -0.5 -1 50
+RL.1.GuidePost.2.ID = 89 1
+RL.1.GuidePost.2 = 322.655 0 413.121 0 0.5 1 50
+RL.1.GuidePost.3.ID = 90 1
+RL.1.GuidePost.3 = 322.655 0 413.121 0 -0.5 -1 50
+RL.1.GeoObject.0.ID = 91 1
+RL.1.GeoObject.0 = 5.661 0 5.661 0 -18.86 100 0 0 0 0 0 1 1 1 0 3D/Buildings/FamilyHouse_00_1.mobj
+RL.1.GeoObject.0.SensorBBox = 1 0 18.42 -10.8 9.7 0 9.1
+RL.1.GeoObject.1.ID = 92 1
+RL.1.GeoObject.1 = 171.782 0 171.782 0 18.568 100 0 0 0 0 0 1 1 1 0 3D/Buildings/Kiosk_03_1.mobj
+RL.1.GeoObject.1.SensorBBox = 1 0 4.5 -3 3 -3 4.7
+RL.1.TreeStrip.0.ID = 93 1
+RL.1.TreeStrip.0 = 59.403 0 98.216 0 5 1 10 5 1 1 0.5 0.5
+RL.1.TreeStrip.1.ID = 94 1
+RL.1.TreeStrip.1 = 59.403 0 98.216 0 -5 -1 10 5 1 1 0.5 0.5
+RL.1.RoadMarking.0.ID = 55 6
+RL.1.RoadMarking.0 = 0 0 0 1 0 0 0.15 0 2 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.0.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+RL.1.RoadMarking.1.ID = 41 31
+RL.1.RoadMarking.1 = 0 0 0 1 0 -1 0.15 0 1 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.1.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+RL.1.RoadMarking.2.ID = 17 7
+RL.1.RoadMarking.2 = 0 0 0 1 0 1 0.15 0 1 0 0 2 4 1 1 0 ""
+RL.1.RoadMarking.2.Material.0 = 1.0,1.0,1.0 0 0 0 0 0 0 0 0 0 0 0
+MaxUsedObjId = 96

@@ -1,64 +1,13 @@
 import zmq
 import os
-from subprocess import Popen, PIPE
 import tkinter as tk
 import _thread
 import numpy as np
 from tf_agents.specs import array_spec
 
-PIPE_PATH = "/tmp/my_pipe"
+from logger import FastLog
 
-if not os.path.exists(PIPE_PATH):
-    os.mkfifo(PIPE_PATH)
-
-# Popen(['gnome-terminal', '-e', 'tail -f %s' % PIPE_PATH])
-
-# class Server_GUI(tk.Frame):
-#     def __init__(self, master=None):
-#         super().__init__(master)
-#         self.master = master
-#         self.pack()
-#         self.create_widgets()
-
-#     def create_widgets(self):
-#         self.quit = tk.Button(self, text="QUIT", fg="red",
-#                               command=self.master.destroy)
-#         self.quit.pack(side="bottom")
-
-#         self.master.bind("<KeyPress>", self.keydown)
-#         self.master.bind("<KeyRelease>", self.keyup)
-
-#     def keydown(self, event):
-#         global action
-#         key = event.keysym
-#         if key == "w":
-#             action[0] = 1.0
-#         if key == "s":
-#             action[1] = 0.9
-#         if key == "a":
-#             action[2] = 10.0
-#         elif key == "d":
-#             action[2] = -10.0
-
-#     def keyup(self, event):
-#         global action
-#         key = event.keysym
-#         if key == "w":
-#             action[0] = 0.0
-#         if key == "s":
-#             action[1] = 0.0
-#         if key == "a":
-#             action[2] = 0.0
-#         if key == "d":
-#             action[2] = 0.0
-
-# def create_gui():
-#     root = tk.Tk()
-#     app = Server_GUI(master=root)
-#     root.attributes('-topmost', True)
-#     app.mainloop()
-
-action = [0 , 0]
+log = FastLog()
 
 class Server:
 
@@ -67,62 +16,52 @@ class Server:
         self.socket = context.socket(zmq.PAIR)
         self.socket.bind("tcp://*:25555")
 
+        self.not_recieved_attempts = 0
+
         self.socket.setsockopt( zmq.LINGER,      0 )  # ____POLICY: set upon instantiations
         self.socket.setsockopt( zmq.AFFINITY,    1 )  # ____POLICY: map upon IO-type thread
-        self.socket.setsockopt( zmq.RCVTIMEO, 2000 )
-
-        self.s_ctrl = " ".join(map(str, action))
-
-        self.uaq_dict = np.zeros(14)
-        self.old_msg = np.array([1.0, 0., 
-                                  -0., -0., 2,
-                                  -0., -0., 2,
-                                  -0, 
-                                  -0,
-                                  -0,
-                                  0,
-                                  0,
-                                  0,], dtype=np.float32)
+        self.socket.setsockopt( zmq.RCVTIMEO, 250  )
 
     def server_step(self, action = [0,0]):
 
-        
-
         #  Wait for next request from client
-        use_old = 0
-        # open(PIPE_PATH, "w").write("Received request ")
-        try:
-            message = self.socket.recv_string()
-        except:
-            open(PIPE_PATH, "w").write( "Retry..." )
+        #log.server("Waiting for request...")
+
+        while self.not_recieved_attempts < 100:
             try:
                 message = self.socket.recv_string()
+                log.server("Recieved request: %s" % message)
+                self.not_recieved_attempts = 0
+                break
             except:
-                open(PIPE_PATH, "w").write( "Didnt work..." )
-                try:
-                    message = self.socket.recv_string()
-                except:
-                    open(PIPE_PATH, "w").write( "Using old msg" )
-                    self.uaq_dict = self.old_msg
-                    message = "1 2 3 4"
-                    use_old = 1
+                #log.server("No request. Retry...")
+                print("No request. Retry...")
+                self.not_recieved_attempts += 1
+                message = "1495.9969 0.0829 -0.3090 0.0086 -0.0018 -0.2668 -0.2983 0.3962 -0.2671 -0.3033 0.3946 -0.2946 -0.2665 0.3973 0.2664 -0.2868 0.3997 0.2664 0.0258 0.5280 0.2402 0.1601 0.6124 0.1118 -0.0830 -0.1857 -0.2216 -0.1349 -0.0189 -0.1392 0.0009 -0.0366"
         
+
         # Convert message to np array
-        if use_old == 0:
-            self.uaq_dict = np.fromstring(message, dtype=np.float32, sep=' ')
-            self.old_msg = self.uaq_dict
+        self.state = np.fromstring(message, dtype=np.float32, sep=' ')
 
-        self.sim_time = self.uaq_dict[0]
-        self.uaq_dict = np.delete(self.uaq_dict, 0)
+        array_sum = np.sum(self.state)
+        array_has_nan = np.isnan(array_sum)
 
-        # open(PIPE_PATH, "w").write("Time:" + str(self.sim_time) + " Values: " +str(self.uaq_dict) + "\n")
-        
+        if array_has_nan:
+            print("Nan detected")
+            try:
+                self.state = self.old_msg
+            except:
+                pass
+        else:
+            self.old_msg = self.state
+
+        self.sim_time = self.state[0]
+        self.state = np.delete(self.state, 0)
+    
         #  Send reply back to client
         s_ctrl = str(action[0]) + " " + str(action[1])
 
-        # open(PIPE_PATH, "w").write("Sending string:" + " %s\n" % s_ctrl)
+        #log.server("Sending action:" + " %s" % s_ctrl)
         self.socket.send_string(s_ctrl)
 
-
-        return np.reshape(self.uaq_dict, (13,)), self.sim_time
-
+        return self.state, self.sim_time

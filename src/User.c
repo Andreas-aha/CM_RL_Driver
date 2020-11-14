@@ -100,9 +100,13 @@
 /* @@PLUGIN-BEGIN-INCLUDE@@ - Automatically generated code - don't edit! */
 /* @@PLUGIN-END@@ */
 
+#define DIM(x) (sizeof(x)/sizeof((x)[0]))
+
+const char* Send_State (int action);
 
 int UserCalcCalledByAppTestRunCalc = 0;
 int counter = 1;
+int drvr_counter;
 int ovrwrt_drvr = true;
 
 
@@ -539,6 +543,99 @@ User_DrivMan_Calc (double dt)
 }
 
 
+/*
+** Send_State (int action)
+**
+** called
+** - in User_VehicleControl_Calc
+** 
+** action:
+** 0 = send state (default)
+** 1 = give IPG Driver control
+** 2 = Restart TestRun
+*/
+const char* 
+Send_State (int action)
+{
+    float State;
+    char out_msg[256] = {'\0'};
+    char *loc = out_msg;
+    size_t out_msg_BufferSpace = 256;
+    size_t tempLen;
+
+    switch(action) {
+        case 0: State = SimCore.Time; break;
+        case 1: State = 4.04; break;
+        case 2: State = 3.03; break;
+        default: State = SimCore.Time; break;
+    }
+
+    /* Connect to server */
+    zsock_t *requester = zsock_new_pair("tcp://localhost:25555");
+
+    float LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
+                            Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
+
+    /* Define message to server */
+    float state_array[] = { \
+                            State, \
+                            Vehicle.v/60, \
+                            Car.FARoadSensor.Path.Deviation.Dist / (Car.FARoadSensor.Act.Width*0.5), \
+                            Car.FARoadSensor.Path.Deviation.Ang / M_PI, \
+                            RoadSensor[10].Path.LongSlope, \
+                            RoadSensor[10].Route.CurveXY * 4, \
+                            RoadSensor[10].Path.Deviation.Dist / (RoadSensor[10].Act.Width*0.5), \
+                            RoadSensor[10].Act.Width/10, \
+                            RoadSensor[11].Route.CurveXY * 4, \
+                            RoadSensor[11].Path.Deviation.Dist / (RoadSensor[11].Act.Width*0.5), \
+                            RoadSensor[11].Act.Width/10, \
+                            RoadSensor[0].Path.Deviation.Dist / (RoadSensor[0].Act.Width*0.5), \
+                            RoadSensor[0].Route.CurveXY * 4, \
+                            RoadSensor[0].Act.Width/10, \
+                            RoadSensor[1].Route.CurveXY * 4, \
+                            RoadSensor[1].Path.Deviation.Dist / (RoadSensor[1].Act.Width*0.5), \
+                            RoadSensor[1].Act.Width/10, \
+                            RoadSensor[2].Route.CurveXY * 4, \
+                            RoadSensor[2].Path.Deviation.Dist / (RoadSensor[2].Act.Width*0.5), \
+                            RoadSensor[2].Act.Width/10, \
+                            RoadSensor[3].Route.CurveXY * 4, \
+                            RoadSensor[3].Path.Deviation.Dist / (RoadSensor[3].Act.Width*0.5), \
+                            RoadSensor[3].Act.Width/10, \
+                            RoadSensor[4].Route.CurveXY * 4, \
+                            RoadSensor[5].Route.CurveXY * 4, \
+                            RoadSensor[6].Route.CurveXY * 4, \
+                            RoadSensor[7].Route.CurveXY * 4, \
+                            RoadSensor[8].Route.CurveXY * 4, \
+                            RoadSensor[9].Route.CurveXY * 4, \
+                            Steering.IF.Ang / (3.5 * M_PI), \
+                            LongSlip / 4, \
+                            Car.ConBdy1.SideSlipAngle / M_PI_2 \
+    };
+
+
+
+    int i;
+    for(i = 0; i < DIM(state_array); ++i)
+    {
+        snprintf(loc, out_msg_BufferSpace, "%.4f ", state_array[i]);
+        tempLen = strlen(loc);
+        loc += tempLen;
+    }
+
+    /* Send messsage to server */
+    printf("Sending: ");
+    zstr_send(requester, out_msg);
+    printf("%s\n", out_msg);
+
+    /* Recieve messsage from server */
+    printf("Incoming Message: ");
+    char *buf = zstr_recv(requester);
+    printf("%s\n", buf);
+
+    zsock_destroy(&requester);
+
+    return buf;
+}
 
 /*
 ** User_VehicleControl_Calc ()
@@ -547,7 +644,6 @@ User_DrivMan_Calc (double dt)
 ** - in RT context
 ** - after VehicleControl_Calc()
 */
-
 int
 User_VehicleControl_Calc (double dt)
 {
@@ -559,55 +655,28 @@ User_VehicleControl_Calc (double dt)
 
     int evry_n;
     int w;
-    char out_msg2[256];
 
+    if (ovrwrt_drvr && SimCore.Time > 1) {
 
-    if (ovrwrt_drvr) {
+        if (Car.FARoadSensor.Act.Width <= abs(Car.FARoadSensor.Path.Deviation.Dist)*2 || abs(Car.FARoadSensor.Path.Deviation.Ang) > 1) {
 
-        
+            if (ovrwrt_drvr) {
+                printf("Control given to IPG Driver because left road\n");
 
-        if (RoadSensor[5].Act.Width <= abs(Vehicle.tRoad)*2 || abs(RoadSensor[5].Route.Deviation.Ang) > 1) {
-            zsock_t *requester = zsock_new_pair("tcp://localhost:25555");
-            printf("Control given to IPG Driver because left road\n");
-            ovrwrt_drvr = false;
-            float ResetRL = 4.04;
+                ovrwrt_drvr = false;
+                Send_State(1);
 
-            float LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
-                                Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
+                w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 2, NULL);
+                if (w<0)
+                    Log("No DVA write to VC.Lights.IndL possible\n");
+            }
 
-
-            sprintf(out_msg2, "%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",  \
-                                                    ResetRL, \
-                                                    Vehicle.v, \
-                                                    Vehicle.tRoad, \
-                                                    RoadSensor[5].Path.Deviation.Ang, \
-                                                    RoadSensor[5].Act.Width, \
-                                                    RoadSensor[0].Route.Deviation.Dist, \
-                                                    RoadSensor[0].Route.Deviation.Ang, \
-                                                    RoadSensor[0].Act.Width, \
-                                                    RoadSensor[1].Route.Deviation.Ang, \
-                                                    RoadSensor[2].Route.Deviation.Ang, \
-                                                    RoadSensor[3].Route.Deviation.Ang, \
-                                                    Steering.IF.Ang, \
-                                                    LongSlip, \
-                                                    Car.ConBdy1.SideSlipAngle
-                                                    );
-            printf("Sending reset...\n");
-            zstr_send(requester, out_msg2);  
-
-            printf("Incoming Message to ignore...\n");
-            char *msg = zstr_recv(requester);  
-            free(msg); 
-            
-            zsock_destroy(&requester);
         }
     }
 
-    bool good_pos = false;
-
     if (!ovrwrt_drvr) {
 
-        w = DVA_WriteRequest("Car.SlotCar.Deviation", OWMode_Abs, 500, 0, 0, RoadSensor[5].Act.Width, NULL);
+        w = DVA_WriteRequest("Car.SlotCar.Deviation", OWMode_Abs, 500, 0, 0, Car.FARoadSensor.Act.Width/2, NULL);
             if (w<0)
                 Log("No DVA write to Car.SlotCar.Deviation possible\n");
 
@@ -616,26 +685,32 @@ User_VehicleControl_Calc (double dt)
                 Log("No DVA write to Car.SlotCar.Deviation possible\n");   
 
         printf("Checking if car in good pos\n");
-        if ((RoadSensor[5].Act.Width*0.2 >= abs(Vehicle.tRoad)*2) && (abs(RoadSensor[5].Path.Deviation.Ang) < 0.1)) {
+        if ((Car.FARoadSensor.Act.Width*0.2 >= abs(Car.FARoadSensor.Path.Deviation.Dist)*2) && (abs(Car.FARoadSensor.Path.Deviation.Ang) < 0.04)) {
           
-            printf("Good pos, Braking car\n");
-            w = DVA_WriteRequest("DM.Brake", OWMode_Abs, 100, 0, 0, 0.4, NULL);
-            if (w<0)
-                Log("No DVA write to DM.Brake possible\n");
-            w = DVA_WriteRequest("DM.Gas", OWMode_Abs, 100, 0, 0, 0, NULL);
-            if (w<0)
-                Log("No DVA write to DM.Gas possible\n");
+            drvr_counter++;
 
-            good_pos = true;
-        }
-        if (good_pos) {
+            if (drvr_counter > 5000) {
+                w = DVA_WriteRequest("DM.Gas", OWMode_Abs, 100, 0, 0, 0, NULL);
+                if (w<0)
+                    Log("No DVA write to DM.Gas possible\n");
+
 
             if (Vehicle.v <= 20) {
+                drvr_counter = 0;
                 ovrwrt_drvr = true;
+
+                w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 0, NULL);
+                if (w<0)
+                    Log("No DVA write to VC.Lights.IndL possible\n");
                 
                 printf("RF Learning again\n");
             }
+            }
+
+            
+        
         }
+        
     }
 
     if (ovrwrt_drvr) {
@@ -656,47 +731,21 @@ User_VehicleControl_Calc (double dt)
 
         int r;
 
-        /* Connect to server */
-        zsock_t *requester = zsock_new_pair("tcp://localhost:25555");
-
-        float LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
-                                Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
-
-        /* Define message to server */
-        sprintf(out_msg2, "%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f",  \
-                                                    SimCore.Time, \
-                                                    Vehicle.v, \
-                                                    Vehicle.tRoad, \
-                                                    RoadSensor[5].Route.Deviation.Ang, \
-                                                    RoadSensor[5].Act.Width, \
-                                                    RoadSensor[0].Route.Deviation.Dist, \
-                                                    RoadSensor[0].Route.Deviation.Ang, \
-                                                    RoadSensor[0].Act.Width, \
-                                                    RoadSensor[1].Route.Deviation.Ang, \
-                                                    RoadSensor[2].Route.Deviation.Ang, \
-                                                    RoadSensor[3].Route.Deviation.Ang, \
-                                                    Steering.IF.Ang, \
-                                                    LongSlip, \
-                                                    Car.ConBdy1.SideSlipAngle
-                                                    );
-        /* Send messsage to server */
-        printf("Sending: ");
-        zstr_send(requester, out_msg2);
-        printf("%s\n", out_msg2);
-
-        /* Recieve messsage from server */
-        printf("Incoming Message: ");
-        char *msg = zstr_recv(requester);
+        
         double user_gas;
         double user_brake;
         double user_steer;
-        printf("%s\n", msg);
  
         char* pEnd;
-        user_gas = strtod (msg, &pEnd);
+        user_gas = strtod (Send_State(0), &pEnd);
         user_steer = strtod (pEnd, &pEnd);
 
-        free(msg);
+        if (user_gas > 4 && user_steer > 4) {
+            ovrwrt_drvr = false;
+            user_gas = 0;
+            user_steer = 0;
+        }
+
 
         printf("Values: %f %f\n", user_gas, user_steer);
 
@@ -720,11 +769,21 @@ User_VehicleControl_Calc (double dt)
                 Log("No DVA write to DM.Gas possible\n");
         }
 
-        r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, evry_n, 0, 0, user_steer, NULL);
+        double steerang;
+        steerang = Steering.IF.Ang + user_steer;
+        if (steerang > 9) {
+            steerang = 9;
+        }
+        else if (steerang < -9)
+        {
+            steerang = -9;
+        }
+        
+
+        r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, evry_n, 0, 0, steerang, NULL);
         if (r<0)
-            Log("No DVA write to DM.Steer.Ang possible\n");
-       
-        zsock_destroy(&requester);
+            Log("No DVA write to DM.Steer possible\n");
+        
     }
 
     counter++;
@@ -972,7 +1031,5 @@ User_End (void)
 void
 User_Cleanup (void)
 {
-    
 
-    
 }

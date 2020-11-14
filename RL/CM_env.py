@@ -2,7 +2,6 @@
 # from __future__ import division
 # from __future__ import print_function
 
-from server import Server
 
 import abc
 import tensorflow as tf
@@ -44,24 +43,27 @@ from tf_agents.policies import random_py_policy
 from tf_agents.replay_buffers import reverb_replay_buffer
 from tf_agents.replay_buffers import reverb_utils
 
-tempdir = tempfile.gettempdir()
+from tf_agents.utils import common as common_utils
+
+from server import Server
+
+import random
+
+tempdir = "/home/aha/Desktop/Git/Test2/RL/rl_data"
 
 
 tcl = tkinter.Tcl()
 tcl.eval("package require Tk")
 
-
-
-
 ## Hyperparameter
 
-num_iterations = 400000 # @param {type:"integer"}
+num_iterations = 4000000 # @param {type:"integer"}
 
 initial_collect_steps = 10000 # @param {type:"integer"}
 collect_steps_per_iteration = 1 # @param {type:"integer"}
 replay_buffer_capacity = 100000 # @param {type:"integer"}
 
-batch_size = 1024 # @param {type:"integer"}
+batch_size = 800 # @param {type:"integer"}
 
 critic_learning_rate = 3e-4 # @param {type:"number"}
 actor_learning_rate = 3e-4 # @param {type:"number"}
@@ -74,10 +76,10 @@ reward_scale_factor = 1.0 # @param {type:"number"}
 actor_fc_layer_params = (256, 256)
 critic_joint_fc_layer_params = (256, 256)
 
-log_interval = 5000 # @param {type:"integer"}
+log_interval = 500 # @param {type:"integer"}
 
 num_eval_episodes = 10 # @param {type:"integer"}
-eval_interval = 2400 # @param {type:"integer"}
+eval_interval = 4000 # @param {type:"integer"}
 
 policy_save_interval = 5000 # @param {type:"integer"}
 
@@ -90,10 +92,11 @@ class CarMakerEnv(py_environment.PyEnvironment):
     # set init state
     # set init obs_spec and action_spec
 
-    while tcl.tk.eval("send CarMaker SimStatus") == "0":
-      tcl.tk.eval("send CarMaker Appl::Start")
-      print("send CarMaker StopSim")
+    tcl.tk.eval("send CarMaker Appl::Start")
+    print("send CarMaker Appl::Start")
     
+    time.sleep(2)
+
     tcl.tk.eval("send CarMaker StartSim")
     print("send CarMaker StartSim")
 
@@ -108,28 +111,15 @@ class CarMakerEnv(py_environment.PyEnvironment):
     self._episode_ended = False
 
     self._action_spec = array_spec.BoundedArraySpec(
-        shape=(2,), dtype=np.float32, minimum=[-1, -2], maximum=[1., 2], name='action')
+        shape=(2,), dtype=np.float32, minimum=[-1, -3.14/8.], maximum=[1., 3.14/8.], name='action')
 
     self._observation_spec = array_spec.BoundedArraySpec(
-      (13,), np.float32,  minimum=[-100., 
-                                  -20., -4, 0.1,
-                                  -4., -4, 0.1,
-                                  -4, 
-                                  -4,
-                                  -4,
-                                  -10,
-                                  -50,
-                                  -5], 
-                          maximum=[1000.,
-                                  20., 4, 60.,
-                                  10., 4, 60., 
-                                  4,
-                                  4,
-                                  4,
-                                  10,
-                                  50,
-                                  5], 
-                          name='observation')
+                        shape= np.shape(self._state),
+                        dtype=np.float32,  
+                        minimum= -2,
+                        maximum=  2,
+                        name='observation'
+    )
 
 
   def action_spec(self):
@@ -140,7 +130,19 @@ class CarMakerEnv(py_environment.PyEnvironment):
 
   def _reset(self, EOT = 0):
     # Restart TestRun and get initial state
+    tcl.tk.eval("send CarMaker SetSimTimeAcc 99999")
     if EOT:
+
+      if (random.random() < 0.5):
+        fname = "Route_5.rd5"
+      else:
+        fname = "Route_4.rd5"
+
+
+      tcl.tk.eval("send CarMaker Scene::File_Read %s -traffic" % fname)
+
+      time.sleep(3)
+
       while tcl.tk.eval("send CarMaker SimStatus") == "0":
         tcl.tk.eval("send CarMaker StopSim")
         time.sleep(1)
@@ -157,15 +159,16 @@ class CarMakerEnv(py_environment.PyEnvironment):
       Server().server_step()
       for _ in range(4):
         Server().server_step()
-      self._state, self.sim_time = Server().server_step()
+      self._state, self.sim_time = Server().server_step([5.,5.])
 
-    self._action_spec = array_spec.BoundedArraySpec(
-        shape=(2,), dtype=np.float32, minimum=[-1, self._state[10]-2], maximum=[1., self._state[10]+2], name='action')
+    time.sleep(0.1)
+    self._state, self.sim_time = Server().server_step()
 
     self.time_counter = 0
     self.bad_counter = 0
     self.last_state = {}
     self._episode_ended = False
+    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     return ts.restart(self._state)
 
   def _step(self, action):
@@ -182,36 +185,33 @@ class CarMakerEnv(py_environment.PyEnvironment):
       # a new episode.
       return self._reset()
 
-    self._action_spec = array_spec.BoundedArraySpec(
-        shape=(2,), dtype=np.float32, minimum=[-1, self._state[10]-2], maximum=[1., self._state[10]+2], name='action')
-
     # Make sure that car is on track 
     if self.sim_time < 4.05 and self.sim_time > 4.03:
-      reward = -np.square(self._state[0])*20
+      print("Recv reset")
+      reward = -np.square(self._state[0]*60)
       self._episode_ended = True
     else:
       self._state, self.sim_time = Server().server_step(action)
-      if self._state[0] <= 2:
+      if self._state[0] <= 0.05:
         self.bad_counter += 1
-        reward = (self._state[0] * np.cos(self._state[2]*1.4) )*10 - 10 
+        reward = (self._state[0] * np.cos(self._state[2]*1.4) ) - 1 
         if self.bad_counter >= 40:
-          reward = -10000
+          reward = -10
           self._episode_ended = True
       else:
         self.bad_counter = 0
-        reward = (self._state[0] * np.cos(self._state[2]*1.4) )*10
+        reward = (self._state[0]*100 * np.cos(self._state[2]*3.5) )
 
     if self.time_counter > 1600:
       self._episode_ended = True
 
     self.time_counter += 1
-    open("/tmp/my_pipe", "w").write("Reward of step: " + str(reward) + "\n")
 
     if self._episode_ended:
       return ts.termination(self._state, reward)
     else:
       return ts.transition(
-          self._state, reward, discount=0.9)
+          self._state, reward, discount=0.99)
 
 
 environment = CarMakerEnv()
@@ -228,8 +228,8 @@ eval_env = environment
 # print('Action Spec:')
 # print(environment.action_spec())
 
-## Enable GPU (but i dont have nvidia, so set it false)
-use_gpu = True 
+## Enable GPU
+use_gpu = False 
 strategy = strategy_utils.get_strategy(tpu=False, use_gpu=use_gpu)
 
 ## Agents
@@ -322,7 +322,8 @@ dataset = reverb_replay.as_dataset(
 experience_dataset_fn = lambda: dataset
 
 ## Policies
-tcl.tk.eval("send CarMaker SetSimTimeAcc 9999")
+CM_sim_perf = 99999
+tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
 # Agent has 2 policies
 
 # agent.policy — The main policy that is used for evaluation and deployment.
@@ -340,6 +341,7 @@ collect_policy = py_tf_eager_policy.PyTFEagerPolicy(
 
 random_policy = random_py_policy.RandomPyPolicy(
   collect_env.time_step_spec(), collect_env.action_spec())
+
 
 ## Actors
 
@@ -450,7 +452,9 @@ print('Evaluate the agents policy once before training')
 avg_return = get_eval_metrics()["AverageReturn"]
 returns = [avg_return]
 
-tcl.tk.eval("send CarMaker SetSimTimeAcc 2")
+CM_sim_perf = 2
+tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+
 print('Training!')
 for _ in range(num_iterations):
   # Training.
@@ -463,10 +467,12 @@ for _ in range(num_iterations):
   step = agent_learner.train_step_numpy
 
   if eval_interval and step % eval_interval == 0:
-    tcl.tk.eval("send CarMaker SetSimTimeAcc 999999")
+    CM_sim_perf = 99999
+    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     metrics = get_eval_metrics()
     log_eval_metrics(step, metrics)
-    tcl.tk.eval("send CarMaker SetSimTimeAcc 2")
+    CM_sim_perf = 2
+    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     returns.append(metrics["AverageReturn"])
 
   if log_interval and step % log_interval == 0:

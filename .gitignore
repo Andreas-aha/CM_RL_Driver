@@ -57,3 +57,12 @@ RL/.vscode/c_cpp_properties.json
 RL/.vscode/launch.json
 RL/.vscode/settings.json
 RL/.vscode/tasks.json
+Movie/
+RL/rl_data/
+RL/Log/
+RL/__pycache__/
+src/CarMaker.linux64
+SimOutput/
+SimInput/
+Data/Road/.tmp_aha-z97x-ud3h_aha.1
+Data/Config/DVA

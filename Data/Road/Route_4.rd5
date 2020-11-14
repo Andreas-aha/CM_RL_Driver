@@ -1,0 +1,252 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent = IPGRoad 9.0
+FileCreator = CarMaker 9.0.1
+LibVersion = 9.0.1
+Country = DEU
+nLinks = 1
+nJunctions = 1
+nObjects = 167
+nRoutes = 2
+RoadNetworkLength = 20445.7951440253
+BBox = -562.737687330561 3439.26231266944 -953.118297818657 1128.88170218134 -833.484388137644 67.3377163000362
+Route.0.Length = 20445.7951440253
+Route.1.Length = 20445.7951440253
+GCS = FlatEarth 1000 2000 468 50.3566 6.9633 468
+RST.Unit = kmh
+RST = 50 100 -1 30 70 50 -1 -1
+Movie = 0.2 1 0.02 0 0 0 0
+Movie.TerrainFName = 3D/Terrain/Route_4.obj
+PathMode = -1
+Junction.0.ID = 166
+Junction.0.Knot = 0 0 0
+Junction.0.RST = urban
+Junction.0.Arm.0.ID = 167
+Junction.0.Arm.0 = 3.85075908703969e-22 0 0
+Junction.0.Arm.1.ID = 168
+Junction.0.Arm.1 = 180 0 0
+Junction.0.MainArms = 0 1
+Link.0.ID = 0
+Link.0.Junctions = 0 0 0 1
+Link.0.RST = undefined
+Link.0.RL.ID = 1
+Link.0.Seg.0.ID = 2
+Link.0.Seg.0.Type = File
+Link.0.Seg.0.File = Examples/Measured/Scenario/DEU_Nuerburgring_Nordschleife_5km.bin
+Link.0.Seg.0.FileAddParam = 0 0 1 1 0 0 0 0 0 0 1 1 1 0 0 "" 0
+Link.0.Seg.0.Param = 0 0.1 0 0 1 1 1 0
+Link.0.Seg.1.ID = 13
+Link.0.Seg.1.Type = PointList
+Link.0.Seg.1.Param = -0.832 -0.555 1 0 0 0 0 0
+Link.0.Seg.1.PointList:
+	-1 -1 3063.764 -725.671
+	-1 -1 2873.906 -528.569
+	-1 -1 2870.135 -151.468
+	-1 -1 2575.996 -106.216
+	-1 -1 2549.599 -351.332
+	-1 -1 2300.712 -336.248
+	-1 -1 2270.544 -106.216
+	-1 -1 2263.002 78.563
+	-1 -1 1980.176 135.129
+	-1 -1 1885.901 -159.01
+	-1 -1 2089.536 -396.584
+	-1 -1 2100.849 -668.096
+	-1 -1 1844.42 -615.302
+	-1 -1 1799.168 -377.729
+	-1 -1 1799.168 -109.987
+	-1 -1 1678.496 123.816
+	-1 -1 1523.884 21.998
+	-1 -1 1587.991 -215.575
+	-1 -1 1422.067 -377.729
+	-1 -1 1331.563 -200.491
+	-1 -1 1357.96 18.227
+	-1 -1 1448.464 191.694
+	-1 -1 1693.58 225.633
+	-1 -1 2153.643 218.091
+	-1 -1 2240.376 278.427
+	-1 -1 2240.421 299.205
+	-1 -1 2174.551 339.074
+	-1 -1 2062.745 343.407
+	-1 -1 1982.631 303.722
+	-1 -1 1899.655 265.598
+	-1 -1 1802.475 329.886
+	-1 -1 1783.255 413.034
+	-1 -1 1840.014 496.938
+	-1 -1 1805.465 573.44
+	-1 -1 1699.351 610.457
+	-1 -1 1489.589 578.375
+	-1 -1 1378.538 499.406
+	-1 -1 1311.908 380.953
+	-1 -1 1519.375 505.581
+	-1 -1 1662.855 544.21
+	-1 -1 1723.559 441.199
+	-1 -1 1624.226 362.101
+	-1 -1 1478.906 376.817
+	-1 -1 1361.179 327.15
+Link.0.Seg.2.ID = 126
+Link.0.Seg.2.Type = PointList
+Link.0.Seg.2.Param = 0.999 0.054 1 0 0 0 0 0
+Link.0.Seg.2.PointList:
+	-1 -1 1198.735 339.635
+	-1 -1 1051.444 494.008
+	-1 -1 870.162 366.544
+	-1 -1 1014.621 241.913
+	-1 -1 1256.207 117.198
+	-1 -1 1038.196 -60.252
+	-1 -1 733.996 142.548
+	-1 -1 744.136 345.349
+	-1 -1 485.565 385.909
+	-1 -1 521.055 228.739
+	-1 -1 602.175 10.728
+	-1 -1 358.815 -131.232
+	-1 -1 -125.622 -215.18
+	-1 -1 -323.23 219.556
+	-1 -1 -275.804 482.374
+	-1 -1 -33.199 488.817
+	-1 -1 -112.242 409.774
+	-1 -1 -222.902 364.325
+	-1 -1 -120.146 291.21
+	-1 -1 -60.864 314.923
+	-1 -1 -11.462 202.287
+	-1 -1 -124.098 235.88
+	-1 -1 -214.998 281.33
+	-1 -1 -278.232 301.09
+	-1 -1 -290.089 251.689
+	-1 -1 -250.567 144.981
+	-1 -1 -147.811 125.22
+	-1 -1 -66.792 150.909
+	-1 -1 -19.366 109.411
+	-1 -1 -84.577 73.842
+	-1 -1 -191.285 85.698
+	-1 -1 -230.806 67.914
+	-1 -1 -238.711 20.488
+	-1 -1 -151.763 -46.699
+	-1 -1 -135.359 -1.679
+	-1 -1 -98.287 -5.623
+	-1 -1 -50.962 -6.411
+Link.0.Seg.3.ID = 164
+Link.0.Seg.3.Type = PointList
+Link.0.Seg.3.Param = 1 6.72084247699335e-24 1 0 0 0 0 0
+Link.0.Seg.3.PointList:
+	-1 -1 0 0
+Link.0.LaneSection.0.ID = 3
+Link.0.LaneSection.0.Start = 0
+Link.0.LaneSection.0.LaneL.0.ID = 4
+Link.0.LaneSection.0.LaneL.0 = 0 4 4 0 0 0 0
+Link.0.LaneSection.0.LaneL.0.ARP = 80 81 82 83 84 85
+Link.0.LaneSection.0.LaneL.0.Width:
+	63 -1 0 0 0 4 0 -999 -999
+Link.0.LaneSection.0.LaneL.1.ID = 6
+Link.0.LaneSection.0.LaneL.1 = 2 8 8 5 0 0 0
+Link.0.LaneSection.0.LaneR.0.ID = 10
+Link.0.LaneSection.0.LaneR.0 = 0 7 7 0 0 0 0
+Link.0.LaneSection.0.LaneR.0.ARP = 86 87 88 89 90 91
+Link.0.LaneSection.0.LaneR.0.Width:
+	67 -1 0 0 0 7 0 -999 -999
+	175 -1 100 0 0 9 -999 -999 -999
+	5 -1 1000 0 0 5 -999 -999 -999
+	7 -1 2000 0 0 11 -999 -999 -999
+	11 -1 2500 0 0 21 -999 -999 -999
+	8 -1 3000 0 0 8 -999 -999 -999
+	9 -1 4000 0 0 10 -999 -999 -999
+	169 -1 5000 0 0 7 -999 -999 -999
+	170 -1 6000 0 0 12 -999 -999 -999
+	172 -1 12000 0 0 15 -999 -999 -999
+	173 -1 16000 0 0 9 -999 -999 -999
+	171 -1 18000 0 0 5 -999 -999 -999
+Link.0.LaneSection.0.LaneR.1.ID = 12
+Link.0.LaneSection.0.LaneR.1 = 2 8 8 5 0 0 0
+Link.0.ElevationProfile.ID = 118
+Link.0.ElevationProfile.Params = 0 0
+Link.0.ElevationProfile:
+	176 -1 17681.497 0 0 -50 -999
+	177 -1 18713.116 0 0 -100 -999
+	174 -1 20445.686 0 0 0 -999
+LanePath.0 = 57 4 2 10 0.1 0.1
+LanePath.1 = 58 10 2 10 0.1 0.1
+Route.0.ID = 55
+Route.0.Name = Route
+Route.0.DrvPath.ID = 59
+Route.0.DrvPath:
+	58
+Route.1.ID = 56
+Route.1.Name = ReverseRoute
+Route.1.DrvPath.ID = 60
+Route.1.DrvPath:
+	57
+RL.1.RoadBridge.0.ID = 178 1
+RL.1.RoadBridge.0 = 16.741 0 20436.717 0 5.5 0.5 0.5 0 0 Standard "" Type1 Type1
+RL.1.RoadBridge.0.Material.0 = Textures/Infrastructure/Concrete_01.jpg 0 0 0 0 0 0 1 1 0 0 0
+RL.1.GuidePost.0.ID = 64 1
+RL.1.GuidePost.0 = 17.15 0 20436.382 0 0.5 1 50
+RL.1.GuidePost.1.ID = 65 1
+RL.1.GuidePost.1 = 17.15 0 20436.382 0 -0.5 -1 50
+RL.1.RoadPainting.0.ID = 43 1
+RL.1.RoadPainting.0 = 19.9999964581328 0 0 0 11 7 0 ""
+RL.1.RoadPainting.0.Material.0 = Textures/Ground/NurburgringRoadMarking.png 0 0 0 0 0 0 1 1 0 0 0
+RL.1.RoadMarking.0.ID = 52 1
+RL.1.RoadMarking.0 = 0 0 0 1 0 0 0.1 0 2 0 0 2 2 1 1 4 ""
+RL.1.RoadMarking.1.ID = 53 1
+RL.1.RoadMarking.1 = 0 0 0 1 -0.1 1 0.1 0 2 0 0 49 1 1 1 4 ""
+RL.1.RoadMarking.2.ID = 54 1
+RL.1.RoadMarking.2 = 0 0 0 1 0.1 -1 0.1 0 2 0 0 49 1 1 1 4 ""
+RL.1.Marker.0.ID = 36 1
+RL.1.Marker.0.Type = DrvSpeed
+RL.1.Marker.0.Param = 149.999791682217 0 1 50 kmh
+RL.1.Marker.1.ID = 37 1
+RL.1.Marker.1.Type = DrvPylon
+RL.1.Marker.1.Param = 179.99978675827 0 -2 0 1 2.7
+RL.1.Marker.2.ID = 38 1
+RL.1.Marker.2.Type = DrvPylon
+RL.1.Marker.2.Param = 219.999786549652 0 -2 0 1 2.7
+RL.1.Marker.3.ID = 104 1
+RL.1.Marker.3.Type = DrvSpeed
+RL.1.Marker.3.Param = 219.999786549652 0 1 -1 kmh
+RL.1.Marker.4.ID = 39 1
+RL.1.Marker.4.Type = EnvWind
+RL.1.Marker.4.Param = 1099.99959414716 0 1 30 -90 ms
+RL.1.Marker.5.ID = 109 1
+RL.1.Marker.5.Type = EnvWind
+RL.1.Marker.5.Param = 1099.99959414716 0 -1 0 -90 ms
+RL.1.Marker.6.ID = 103 1
+RL.1.Marker.6.Type = EnvWind
+RL.1.Marker.6.Param = 1219.99947642469 0 -1 30 -90 ms
+RL.1.Marker.7.ID = 108 1
+RL.1.Marker.7.Type = EnvWind
+RL.1.Marker.7.Param = 1219.99947642469 0 1 0 -90 ms
+RL.1.Marker.8.ID = 40 1
+RL.1.Marker.8.Type = DrvSpeed
+RL.1.Marker.8.Param = 1299.99946574475 0 1 70 kmh
+RL.1.Marker.9.ID = 105 1
+RL.1.Marker.9.Type = DrvSpeed
+RL.1.Marker.9.Param = 1499.99936229998 0 1 -1 kmh
+RL.1.Marker.10.ID = 41 1
+RL.1.Marker.10.Type = DrvSpeed
+RL.1.Marker.10.Param = 2059.99935044155 0 1 80 kmh
+RL.1.Marker.11.ID = 106 1
+RL.1.Marker.11.Type = DrvSpeed
+RL.1.Marker.11.Param = 2559.99931388978 0 1 -1 kmh
+RL.1.Marker.12.ID = 42 1
+RL.1.Marker.12.Type = DrvSpeed
+RL.1.Marker.12.Param = 4899.99912884345 0 1 10 kmh
+RL.1.Marker.13.ID = 107 1
+RL.1.Marker.13.Type = DrvSpeed
+RL.1.Marker.13.Param = 4949.9991284187 0 1 -1 kmh
+RL.1.Bump.0.ID = 30 1
+RL.1.Bump.0.Type = Beam
+RL.1.Bump.0.Param = 519.999741977605 0 0 0 0 1 0 0.1 1 5 1 8
+RL.1.Bump.1.ID = 31 1
+RL.1.Bump.1.Type = Friction
+RL.1.Bump.1.Param = 599.999740648776 0 999.999629275267 0 -1 0 0 0.7 0 2
+RL.1.Bump.2.ID = 32 1
+RL.1.Bump.2.Type = Friction
+RL.1.Bump.2.Param = 1299.99946574475 0 1459.99938349106 0 -3 0 0 0.65 0 6
+RL.1.Bump.3.ID = 33 1
+RL.1.Bump.3.Type = Friction
+RL.1.Bump.3.Param = 1759.99935472951 0 1899.99935081403 0 -2 0 0 0.3 0 2.5
+RL.1.Bump.4.ID = 34 1
+RL.1.Bump.4.Type = Friction
+RL.1.Bump.4.Param = 2059.99935044155 0 2559.99931388978 0 -3 0 0 0.45 0 0.5
+RL.1.Bump.5.ID = 35 1
+RL.1.Bump.5.Type = Friction
+RL.1.Bump.5.Param = 2059.99935044155 0 2559.99931388978 0 -1.5 0 0 0.45 0 0.6
+MaxUsedObjId = 178

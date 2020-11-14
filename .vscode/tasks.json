@@ -1,0 +1,17 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build CarMaker",
+            "command": "make",
+            "options": {
+                "cwd": "/home/aha/Desktop/Git/Test2/src"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    "version": "2.0.0"
+}
