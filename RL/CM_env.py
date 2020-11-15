@@ -49,7 +49,7 @@ from server import Server
 
 import random
 
-tempdir = "/home/aha/Desktop/Git/Test2/RL/rl_data"
+tempdir = "/home/vmroot/CM_Projects/CM_RL_Driver/RL/rl_data"
 
 
 tcl = tkinter.Tcl()
@@ -63,7 +63,7 @@ initial_collect_steps = 10000 # @param {type:"integer"}
 collect_steps_per_iteration = 1 # @param {type:"integer"}
 replay_buffer_capacity = 100000 # @param {type:"integer"}
 
-batch_size = 800 # @param {type:"integer"}
+batch_size = 1024 # @param {type:"integer"}
 
 critic_learning_rate = 3e-4 # @param {type:"number"}
 actor_learning_rate = 3e-4 # @param {type:"number"}
@@ -83,6 +83,7 @@ eval_interval = 4000 # @param {type:"integer"}
 
 policy_save_interval = 5000 # @param {type:"integer"}
 
+speed_eval = 4
 
 ## Environment
 
@@ -229,7 +230,7 @@ eval_env = environment
 # print(environment.action_spec())
 
 ## Enable GPU
-use_gpu = False 
+use_gpu = True 
 strategy = strategy_utils.get_strategy(tpu=False, use_gpu=use_gpu)
 
 ## Agents
@@ -452,7 +453,7 @@ print('Evaluate the agents policy once before training')
 avg_return = get_eval_metrics()["AverageReturn"]
 returns = [avg_return]
 
-CM_sim_perf = 2
+CM_sim_perf = speed_eval
 tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
 
 print('Training!')
@@ -471,7 +472,7 @@ for _ in range(num_iterations):
     tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     metrics = get_eval_metrics()
     log_eval_metrics(step, metrics)
-    CM_sim_perf = 2
+    CM_sim_perf = speed_eval
     tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     returns.append(metrics["AverageReturn"])
 
