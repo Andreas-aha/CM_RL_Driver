@@ -18,8 +18,6 @@ import tempfile
 import os
 
 from tf_agents.environments import py_environment
-from tf_agents.environments import tf_environment
-from tf_agents.environments import tf_py_environment
 from tf_agents.environments import utils
 from tf_agents.specs import array_spec
 from tf_agents.environments import wrappers
@@ -28,7 +26,6 @@ from tf_agents.trajectories import time_step as ts
 from tf_agents.agents.ddpg import critic_network
 from tf_agents.agents.sac import sac_agent
 from tf_agents.agents.sac import tanh_normal_projection_network
-from tf_agents.environments import suite_pybullet
 from tf_agents.experimental.train import actor
 from tf_agents.experimental.train import learner
 from tf_agents.experimental.train import triggers
@@ -83,7 +80,8 @@ eval_interval = 4000 # @param {type:"integer"}
 
 policy_save_interval = 5000 # @param {type:"integer"}
 
-speed_eval = 4
+speed_eval = 1
+speed_coll = 999999
 
 ## Environment
 
@@ -131,7 +129,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
 
   def _reset(self, EOT = 0):
     # Restart TestRun and get initial state
-    tcl.tk.eval("send CarMaker SetSimTimeAcc 99999")
+    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % speed_coll)
     if EOT:
 
       if (random.random() < 0.5):
@@ -323,7 +321,7 @@ dataset = reverb_replay.as_dataset(
 experience_dataset_fn = lambda: dataset
 
 ## Policies
-CM_sim_perf = 99999
+CM_sim_perf = speed_coll
 tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
 # Agent has 2 policies
 
@@ -364,13 +362,13 @@ rb_observer = reverb_utils.ReverbAddTrajectoryObserver(
 # Actor with the random policy and collect experiences to seed the replay buffer with
 
 print('Starting initial_collect_actor')
-initial_collect_actor = actor.Actor(
-  collect_env,
-  random_policy,
-  train_step,
-  steps_per_run=initial_collect_steps,
-  observers=[rb_observer])
-initial_collect_actor.run()
+# initial_collect_actor = actor.Actor(
+#   collect_env,
+#   random_policy,
+#   train_step,
+#   steps_per_run=initial_collect_steps,
+#   observers=[rb_observer])
+# initial_collect_actor.run()
 print('Finished initial_collect_actor')
 
 # Instantiate an Actor with the collect policy to gather more experiences during training
@@ -418,6 +416,7 @@ learning_triggers = [
         interval=policy_save_interval),
     triggers.StepPerSecondLogTrigger(train_step, interval=1000),
 ]
+
 
 agent_learner = learner.Learner(
   tempdir,
@@ -468,7 +467,7 @@ for _ in range(num_iterations):
   step = agent_learner.train_step_numpy
 
   if eval_interval and step % eval_interval == 0:
-    CM_sim_perf = 99999
+    CM_sim_perf = speed_coll
     tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     metrics = get_eval_metrics()
     log_eval_metrics(step, metrics)
