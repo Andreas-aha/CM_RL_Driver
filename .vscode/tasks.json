@@ -5,7 +5,7 @@
             "label": "Build CarMaker",
             "command": "make",
             "options": {
-                "cwd": "/home/vmroot/CM_Projects/CM_RL_Driver/src"
+                "cwd": "/home/aha/Desktop/Git/Test2/src"
             },
             "group": {
                 "kind": "build",

@@ -56,10 +56,10 @@ static const char *CompileFlags[] = {
 
 tAppStartInfo   AppStartInfo = {
     "Car_Generic <insert.your.version.no>",          /* App_Version         */
-    "336",          /* App_BuildVersion    */
-    "vmroot",     /* App_CompileUser     */
-    "win-support-m01",         /* App_CompileSystem   */
-    "2020-11-14 21:12:18",  /* App_CompileTime */
+    "337",          /* App_BuildVersion    */
+    "aha",     /* App_CompileUser     */
+    "aha-z97x-ud3h",         /* App_CompileSystem   */
+    "2020-11-18 10:06:12",  /* App_CompileTime */
 
     CompileFlags,                /* App_CompileFlags  */
     CompileLibs,                 /* App_Libs          */
