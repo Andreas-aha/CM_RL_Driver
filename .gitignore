@@ -33,3 +33,6 @@ src/CM_Vehicle.c
 src/cmenv.m
 src/IO.c
 src/IOVec.h
+src/.depend
+src/.version_linux64
+src/app_tmp.c

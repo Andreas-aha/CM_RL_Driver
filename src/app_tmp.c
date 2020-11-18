@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_DSRT)
+#  include <DsApplicationInterface.h>
+#endif
 
 #include <infoc.h>
 #include <CarMaker.h>
@@ -28,11 +31,11 @@
 extern const char *SetConnectedIO (const char *io);
 
 static const char *CompileLibs[] = {
-    /* /net/dagobert/local/work.fh/cm90-git/src_lib/Portings/linux64/lib/libcar.a */
-    /* /net/dagobert/local/work.fh/cm90-git/src_lib/Portings/linux64/lib/libcarmaker.a */
-    /* /net/dagobert/local/work.fh/cm90-git/lib/driver/linux64/lib/libipgdriver.a */
-    /* /net/dagobert/local/work.fh/cm90-git/lib/road/linux64/lib/libipgroad.a */
-    /* /net/dagobert/local/work.fh/cm90-git/lib/tire/linux64/lib/libipgtire.a */
+    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libcar.a */
+    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libcarmaker.a */
+    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libipgdriver.a */
+    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libipgroad.a */
+    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libipgtire.a */
     "libcar.a	CarMaker-Car linux64 9.0.2 2020-08-05",
     "libcarmaker.a	CarMaker linux64 9.0.2 2020-08-05",
     "libipgdriver.a	IPGDriver linux64 9.0.2 2020-08-04",
@@ -43,29 +46,25 @@ static const char *CompileLibs[] = {
 
 
 static const char *CompileFlags[] = {
-    "-m64 -fPIC -O3 -DNDEBUG -DLINUX -DLINUX64 -D_GNU_SOURCE",
-    "-D_FILE_OFFSET_BITS=64 -DCM_NUMVER=90002 -DMYMODELS",
-    "-Wall -Wimplicit -Wmissing-prototypes",
-    "-Wno-format-overflow -Wno-format-truncation",
-    "-Wno-unused-const-variable",
-    "-Wno-misleading-indentation",
-    "-Wno-int-in-bool-context -fno-stack-protector",
-    "-Wlogical-op",
+    "-m64 -fPIC -g -O1 -DLINUX -DLINUX64 -D_GNU_SOURCE",
+    "-D_FILE_OFFSET_BITS=64 -DCM_NUMVER=90002",
+    "-I/opt/ipg/carmaker/linux64-9.0.2/include -Wall",
+    "-Wimplicit -Wmissing-prototypes",
     NULL
 };
 
 
 tAppStartInfo   AppStartInfo = {
-    "CarMaker 9.0.2 - Car_Generic",          /* App_Version         */
-    "167",          /* App_BuildVersion    */
-    "fh",     /* App_CompileUser     */
-    "obelix.ipg",         /* App_CompileSystem   */
-    "2020-08-05 17:14:28",  /* App_CompileTime */
+    "Car_Generic <insert.your.version.no>",          /* App_Version         */
+    "340",          /* App_BuildVersion    */
+    "aha",     /* App_CompileUser     */
+    "aha-z97x-ud3h",         /* App_CompileSystem   */
+    "2020-11-18 12:19:23",  /* App_CompileTime */
 
     CompileFlags,                /* App_CompileFlags  */
     CompileLibs,                 /* App_Libs          */
 
-    "",          /* SetVersion        */
+    "9.0.2",          /* SetVersion        */
 
     NULL,           /* TestRunName       */
     NULL,           /* TestRunFName      */
@@ -185,4 +184,11 @@ App_ExportConfig (void)
 }
 
 
+#if defined(_DS1006)
+void
+IPGRT_Board_Init (void)
+{
+    init();
+}
+#endif
 
