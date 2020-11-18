@@ -8,7 +8,6 @@ import tensorflow as tf
 import numpy as np
 import time
 
-import tkinter
 import _thread
 
 import base64
@@ -49,9 +48,6 @@ import random
 tempdir = "/home/vmroot/CM_Projects/CM_RL_Driver/RL/rl_data"
 
 
-tcl = tkinter.Tcl()
-tcl.eval("package require Tk")
-
 ## Hyperparameter
 
 num_iterations = 4000000 # @param {type:"integer"}
@@ -91,15 +87,15 @@ class CarMakerEnv(py_environment.PyEnvironment):
     # set init state
     # set init obs_spec and action_spec
 
-    tcl.tk.eval("send CarMaker Appl::Start")
+    Server().send_gui("send CarMaker Appl::Start")
     print("send CarMaker Appl::Start")
     
     time.sleep(2)
 
-    tcl.tk.eval("send CarMaker StartSim")
+    Server().send_gui("send CarMaker StartSim")
     print("send CarMaker StartSim")
 
-    while tcl.tk.eval("send CarMaker SimStatus") != "0":
+    while Server().send_gui("send CarMaker SimStatus") != "0":
       print("send CarMaker SimStatus")
       self._state, self.sim_time =  Server().server_step()
 
@@ -129,7 +125,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
 
   def _reset(self, EOT = 0):
     # Restart TestRun and get initial state
-    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % speed_coll)
+    Server().send_gui("send CarMaker SetSimTimeAcc %d" % speed_coll)
     if EOT:
 
       if (random.random() < 0.5):
@@ -138,19 +134,19 @@ class CarMakerEnv(py_environment.PyEnvironment):
         fname = "Route_4.rd5"
 
 
-      tcl.tk.eval("send CarMaker Scene::File_Read %s -traffic" % fname)
+      Server().send_gui("send CarMaker Scene::File_Read %s -traffic" % fname)
 
       time.sleep(3)
 
-      while tcl.tk.eval("send CarMaker SimStatus") == "0":
-        tcl.tk.eval("send CarMaker StopSim")
+      while Server().send_gui("send CarMaker SimStatus") == "0":
+        Server().send_gui("send CarMaker StopSim")
         time.sleep(1)
-        if tcl.tk.eval("send CarMaker SimStatus") == "0":
+        if Server().send_gui("send CarMaker SimStatus") == "0":
           Server().server_step()
       time.sleep(3)
-      tcl.tk.eval("send CarMaker StartSim")
+      Server().send_gui("send CarMaker StartSim")
 
-      while tcl.tk.eval("send CarMaker SimStatus") != "0":
+      while Server().send_gui("send CarMaker SimStatus") != "0":
         Server().server_step()
 
       self._state, self.sim_time = Server().server_step()
@@ -167,7 +163,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
     self.bad_counter = 0
     self.last_state = {}
     self._episode_ended = False
-    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+    Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     return ts.restart(self._state)
 
   def _step(self, action):
@@ -322,7 +318,7 @@ experience_dataset_fn = lambda: dataset
 
 ## Policies
 CM_sim_perf = speed_coll
-tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
 # Agent has 2 policies
 
 # agent.policy — The main policy that is used for evaluation and deployment.
@@ -453,7 +449,7 @@ avg_return = get_eval_metrics()["AverageReturn"]
 returns = [avg_return]
 
 CM_sim_perf = speed_eval
-tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
 
 print('Training!')
 for _ in range(num_iterations):
@@ -468,11 +464,11 @@ for _ in range(num_iterations):
 
   if eval_interval and step % eval_interval == 0:
     CM_sim_perf = speed_coll
-    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+    Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     metrics = get_eval_metrics()
     log_eval_metrics(step, metrics)
     CM_sim_perf = speed_eval
-    tcl.tk.eval("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+    Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
     returns.append(metrics["AverageReturn"])
 
   if log_interval and step % log_interval == 0:

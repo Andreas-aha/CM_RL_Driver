@@ -5,6 +5,8 @@ import _thread
 import numpy as np
 from tf_agents.specs import array_spec
 
+import socket
+
 from logger import FastLog
 
 log = FastLog()
@@ -12,6 +14,7 @@ log = FastLog()
 class Server:
 
     def __init__(self):
+        # Connect to CM Simulation
         context = zmq.Context()
         self.socket = context.socket(zmq.PAIR)
         self.socket.bind("tcp://*:25555")
@@ -21,6 +24,13 @@ class Server:
         self.socket.setsockopt( zmq.LINGER,      0 )  # ____POLICY: set upon instantiations
         self.socket.setsockopt( zmq.AFFINITY,    1 )  # ____POLICY: map upon IO-type thread
         self.socket.setsockopt( zmq.RCVTIMEO, 250  )
+
+        # Connect to CM GUI
+        TCP_IP = socket.gethostname()
+        TCP_PORT = 14100
+
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect((TCP_IP, TCP_PORT))
 
     def server_step(self, action = [0,0]):
 
@@ -65,3 +75,9 @@ class Server:
         self.socket.send_string(s_ctrl)
 
         return self.state, self.sim_time
+
+    def send_gui (self, msg):
+
+        MESSAGE = "{%s}\n" % msg
+
+        self.s.send(MESSAGE.encode())
