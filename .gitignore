@@ -25,3 +25,11 @@ include/
 /src/*.o
 /src/core
 /src/*~ *
+src/.settings/org.eclipse.cdt.core.prefs
+src/app_tmp_20201118_1215.c
+src/app_tmp.c
+src/CM_Main.c
+src/CM_Vehicle.c
+src/cmenv.m
+src/IO.c
+src/IOVec.h

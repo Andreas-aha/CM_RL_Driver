@@ -1,5 +1,5 @@
 #******************************************************************************
-#**  CarMaker - Version 9.0.1
+#**  CarMaker - Version 9.0.2
 #**  Vehicle Dynamics Simulation Toolkit
 #**
 #**  Copyright (C)   IPG Automotive GmbH
@@ -13,7 +13,7 @@
 #**
 #******************************************************************************
 
-include /opt/ipg/carmaker/linux64-9.0.1/include/MakeDefs.linux64
+include /opt/ipg/carmaker/linux64-9.0.2/include/MakeDefs.linux64
 
 APP_VER =		"Car_Generic <insert.your.version.no>"
 APP_NAME =		CarMaker.$(ARCH)$(EXE_EXT)
@@ -33,7 +33,7 @@ OBJS =			CM_Main.o CM_Vehicle.o User.o
 
 ### Linking with RTW-built Simulink models
 
-#MATSUPP_MATVER =	R2017a
+#MATSUPP_MATVER =	R2016b
 #LD_LIBS +=		$(MATSUPP_LIB)
 
 
