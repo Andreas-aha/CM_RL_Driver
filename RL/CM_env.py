@@ -88,15 +88,15 @@ class CarMakerEnv(py_environment.PyEnvironment):
     # set init obs_spec and action_spec
 
     Server().send_gui("Appl::Start")
-    print("Appl::Start")
+    #print("Appl::Start")
 
     time.sleep(2)
 
     Server().send_gui("StartSim")
-    print("StartSim")
+    #print("StartSim")
 
     while Server().send_gui("SimStatus") != "0":
-      print("SimStatus wait for != 0")
+      #print("SimStatus wait for != 0")
       self._state, self.sim_time =  Server().server_step()
 
     self._state, self.sim_time =  Server().server_step()
@@ -130,26 +130,37 @@ class CarMakerEnv(py_environment.PyEnvironment):
     Server().send_gui("SetSimTimeAcc %d" % speed_coll)
     if EOT:
 
-      if (random.random() < 0.5):
+      Number = random.random()
+
+      if (Number < 0.33):
+        fname = "Route_4.rd5"
+      elif (Number < 0.66):
         fname = "Route_5.rd5"
       else:
-        fname = "Route_4.rd5"
-
+        fname = "Route_6.rd5"
 
       Server().send_gui("Scene::File_Read %s -traffic" % fname)
 
+
       time.sleep(3)
+
+
 
       while Server().send_gui("SimStatus") == "0":
         Server().send_gui("StopSim")
+        #print("Send stop sim")
         time.sleep(1)
-        if Server().send_gui("SimStatus") == "0":
-          Server().server_step()
-      time.sleep(3)
+      #   if Server().send_gui("SimStatus") == "0":
+      #     print("Send step")
+      #     Server().server_step()
+      # time.sleep(3)
       Server().send_gui("StartSim")
+      #print("Starting sim")
+      time.sleep(0.5)
 
       while Server().send_gui("SimStatus") != "0":
         Server().server_step()
+        #print("Sending steps to start sim")
 
       self._state, self.sim_time = Server().server_step()
     else:
@@ -171,7 +182,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
   def _step(self, action):
 
     # If TestRun end of time
-    if self.sim_time >= 1800 or (self.sim_time > 3.02 and self.sim_time < 3.04):
+    if self.sim_time >= 2000 or (self.sim_time > 3.02 and self.sim_time < 3.04):
       self._episode_ended = True
       self._reset(1)
     else:
@@ -184,7 +195,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
 
     # Make sure that car is on track
     if self.sim_time < 4.05 and self.sim_time > 4.03:
-      print("Recv reset")
+      #print("Recv reset")
       reward = -np.square(self._state[0]*60)
       self._episode_ended = True
     else:

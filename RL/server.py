@@ -35,12 +35,12 @@ class Server:
         while self.not_recieved_attempts < 100:
             try:
                 message = self.zsocket.recv_string()
-                log.server("Recieved request: %s" % message)
+                #log.server("Recieved request: %s" % message)
                 self.not_recieved_attempts = 0
                 break
             except:
                 #log.server("No request. Retry...")
-                print("No request. Retry...")
+                #print("No request. Retry...")
                 self.not_recieved_attempts += 1
                 message = "1495.9969 0.0829 -0.3090 0.0086 -0.0018 -0.2668 -0.2983 0.3962 -0.2671 -0.3033 0.3946 -0.2946 -0.2665 0.3973 0.2664 -0.2868 0.3997 0.2664 0.0258 0.5280 0.2402 0.1601 0.6124 0.1118 -0.0830 -0.1857 -0.2216 -0.1349 -0.0189 -0.1392 0.0009 -0.0366"
         
@@ -52,7 +52,7 @@ class Server:
         array_has_nan = np.isnan(array_sum)
 
         if array_has_nan:
-            print("Nan detected")
+            #print("Nan detected")
             try:
                 self.state = self.old_msg
             except:
