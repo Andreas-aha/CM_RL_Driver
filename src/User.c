@@ -628,13 +628,29 @@ Send_State (int action)
     printf("%s\n", out_msg);
 
     /* Recieve messsage from server */
+    
+    zsock_set_rcvtimeo(requester, 10000);
     printf("Incoming Message: ");
     char *buf = zstr_recv(requester);
-    printf("%s\n", buf);
 
-    zsock_destroy(&requester);
+    if (buf == NULL) {
+        printf("No msg\n");
+        zstr_free(&buf);
+        printf("Free\n");
+        zsock_destroy(&requester);
+        printf("Destroyed\n");
+        char *buf1 = "0 0";
+        printf("buf1 created\n");
+        return buf1;
+    }
+    else {
+        printf("%s\n", buf);
+        zsock_destroy(&requester);
+        return buf;
+    }
 
-    return buf;
+
+    
 }
 
 /*
@@ -651,6 +667,9 @@ User_VehicleControl_Calc (double dt)
        the vehicle in driving state using the IPG's
        PowerTrain Control model 'Generic' or similar */
     if (Vehicle.OperationState != OperState_Driving)
+	    return 0;
+
+    if (SimCore.State != SCState_Simulate)
 	    return 0;
 
     int evry_n;

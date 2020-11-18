@@ -45,7 +45,7 @@ from server import Server
 
 import random
 
-tempdir = "/home/vmroot/CM_Projects/CM_RL_Driver/RL/rl_data"
+tempdir = "%s/rl_data" % os.getcwd()
 
 
 ## Hyperparameter
@@ -87,17 +87,19 @@ class CarMakerEnv(py_environment.PyEnvironment):
     # set init state
     # set init obs_spec and action_spec
 
-    Server().send_gui("send CarMaker Appl::Start")
-    print("send CarMaker Appl::Start")
-    
+    Server().send_gui("Appl::Start")
+    print("Appl::Start")
+
     time.sleep(2)
 
-    Server().send_gui("send CarMaker StartSim")
-    print("send CarMaker StartSim")
+    Server().send_gui("StartSim")
+    print("StartSim")
 
-    while Server().send_gui("send CarMaker SimStatus") != "0":
-      print("send CarMaker SimStatus")
+    while Server().send_gui("SimStatus") != "0":
+      print("SimStatus wait for != 0")
       self._state, self.sim_time =  Server().server_step()
+
+    self._state, self.sim_time =  Server().server_step()
 
     self.time_counter = 0
     self.bad_counter = 0
@@ -106,11 +108,11 @@ class CarMakerEnv(py_environment.PyEnvironment):
     self._episode_ended = False
 
     self._action_spec = array_spec.BoundedArraySpec(
-        shape=(2,), dtype=np.float32, minimum=[-1, -3.14/8.], maximum=[1., 3.14/8.], name='action')
+        shape=(2,), dtype=np.float32, minimum=[-1, -3.14/4.], maximum=[1., 3.14/4.], name='action')
 
     self._observation_spec = array_spec.BoundedArraySpec(
                         shape= np.shape(self._state),
-                        dtype=np.float32,  
+                        dtype=np.float32,
                         minimum= -2,
                         maximum=  2,
                         name='observation'
@@ -125,7 +127,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
 
   def _reset(self, EOT = 0):
     # Restart TestRun and get initial state
-    Server().send_gui("send CarMaker SetSimTimeAcc %d" % speed_coll)
+    Server().send_gui("SetSimTimeAcc %d" % speed_coll)
     if EOT:
 
       if (random.random() < 0.5):
@@ -134,19 +136,19 @@ class CarMakerEnv(py_environment.PyEnvironment):
         fname = "Route_4.rd5"
 
 
-      Server().send_gui("send CarMaker Scene::File_Read %s -traffic" % fname)
+      Server().send_gui("Scene::File_Read %s -traffic" % fname)
 
       time.sleep(3)
 
-      while Server().send_gui("send CarMaker SimStatus") == "0":
-        Server().send_gui("send CarMaker StopSim")
+      while Server().send_gui("SimStatus") == "0":
+        Server().send_gui("StopSim")
         time.sleep(1)
-        if Server().send_gui("send CarMaker SimStatus") == "0":
+        if Server().send_gui("SimStatus") == "0":
           Server().server_step()
       time.sleep(3)
-      Server().send_gui("send CarMaker StartSim")
+      Server().send_gui("StartSim")
 
-      while Server().send_gui("send CarMaker SimStatus") != "0":
+      while Server().send_gui("SimStatus") != "0":
         Server().server_step()
 
       self._state, self.sim_time = Server().server_step()
@@ -163,7 +165,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
     self.bad_counter = 0
     self.last_state = {}
     self._episode_ended = False
-    Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+    Server().send_gui("SetSimTimeAcc %d" % CM_sim_perf)
     return ts.restart(self._state)
 
   def _step(self, action):
@@ -174,13 +176,13 @@ class CarMakerEnv(py_environment.PyEnvironment):
       self._reset(1)
     else:
       self.last_time = self.sim_time
-    
+
     if self._episode_ended:
       # The last action ended the episode. Ignore the current action and start
       # a new episode.
       return self._reset()
 
-    # Make sure that car is on track 
+    # Make sure that car is on track
     if self.sim_time < 4.05 and self.sim_time > 4.03:
       print("Recv reset")
       reward = -np.square(self._state[0]*60)
@@ -189,7 +191,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
       self._state, self.sim_time = Server().server_step(action)
       if self._state[0] <= 0.05:
         self.bad_counter += 1
-        reward = (self._state[0] * np.cos(self._state[2]*1.4) ) - 1 
+        reward = (self._state[0] * np.cos(self._state[2]*1.4) ) - 1
         if self.bad_counter >= 40:
           reward = -10
           self._episode_ended = True
@@ -224,7 +226,7 @@ eval_env = environment
 # print(environment.action_spec())
 
 ## Enable GPU
-use_gpu = True 
+use_gpu = True
 strategy = strategy_utils.get_strategy(tpu=False, use_gpu=use_gpu)
 
 ## Agents
@@ -284,8 +286,8 @@ with strategy.scope():
 
 ## Replay Buffer
 
-# max_size -- in a distributed setting with async collection and training, 
-# you will probably want to experiment with rate_limiters.SampleToInsertRatio, 
+# max_size -- in a distributed setting with async collection and training,
+# you will probably want to experiment with rate_limiters.SampleToInsertRatio,
 # using a samples_per_insert somewhere between 2 and 1000
 
 #rate_limiter=reverb.rate_limiters.SampleToInsertRatio(samples_per_insert=3.0, min_size_to_sample=3, error_buffer=3.0)
@@ -318,7 +320,7 @@ experience_dataset_fn = lambda: dataset
 
 ## Policies
 CM_sim_perf = speed_coll
-Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+Server().send_gui("SetSimTimeAcc %d" % CM_sim_perf)
 # Agent has 2 policies
 
 # agent.policy — The main policy that is used for evaluation and deployment.
@@ -341,11 +343,11 @@ random_policy = random_py_policy.RandomPyPolicy(
 ## Actors
 
 # Each Actor worker runs a sequence of data collection steps given the local values of the policy variables.
-# Variable updates are done explicitly using the variable container client instance in the training script 
+# Variable updates are done explicitly using the variable container client instance in the training script
 # before calling actor.run().
 
-# As the Actors run data collection steps, they pass trajectories of (state, action, reward) to the observer, 
-# which caches and writes them to the Reverb replay system. 
+# As the Actors run data collection steps, they pass trajectories of (state, action, reward) to the observer,
+# which caches and writes them to the Reverb replay system.
 
 # storing trajectories for frames [(t0,t1) (t1,t2) (t2,t3), ...] because stride_length=1
 
@@ -358,13 +360,13 @@ rb_observer = reverb_utils.ReverbAddTrajectoryObserver(
 # Actor with the random policy and collect experiences to seed the replay buffer with
 
 print('Starting initial_collect_actor')
-# initial_collect_actor = actor.Actor(
-#   collect_env,
-#   random_policy,
-#   train_step,
-#   steps_per_run=initial_collect_steps,
-#   observers=[rb_observer])
-# initial_collect_actor.run()
+initial_collect_actor = actor.Actor(
+  collect_env,
+  random_policy,
+  train_step,
+  steps_per_run=initial_collect_steps,
+  observers=[rb_observer])
+initial_collect_actor.run()
 print('Finished initial_collect_actor')
 
 # Instantiate an Actor with the collect policy to gather more experiences during training
@@ -382,7 +384,7 @@ collect_actor = actor.Actor(
   observers=[rb_observer, env_step_metric])
 print('Finished env_step_metric')
 
-# Actor which will be used to evaluate the policy during training. 
+# Actor which will be used to evaluate the policy during training.
 # We pass in actor.eval_metrics(num_eval_episodes) to log metrics later.
 
 print('Starting eval_actor')
@@ -396,9 +398,9 @@ eval_actor = actor.Actor(
 )
 print('Finished eval_actor')
 
-# The Learner component contains the agent and performs gradient step updates 
-# to the policy variables using experience data from the replay buffer. After 
-# one or more training steps, the Learner can push a new set of variable values 
+# The Learner component contains the agent and performs gradient step updates
+# to the policy variables using experience data from the replay buffer. After
+# one or more training steps, the Learner can push a new set of variable values
 # to the variable container.
 
 saved_model_dir = os.path.join(tempdir, learner.POLICY_SAVED_MODEL_DIR)
@@ -449,26 +451,26 @@ avg_return = get_eval_metrics()["AverageReturn"]
 returns = [avg_return]
 
 CM_sim_perf = speed_eval
-Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+Server().send_gui("SetSimTimeAcc %d" % CM_sim_perf)
 
 print('Training!')
 for _ in range(num_iterations):
   # Training.
-  
+
   collect_actor.run()
   loss_info = agent_learner.run(iterations=1)
 
   # Evaluating.
-  
+
   step = agent_learner.train_step_numpy
 
   if eval_interval and step % eval_interval == 0:
     CM_sim_perf = speed_coll
-    Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+    Server().send_gui("SetSimTimeAcc %d" % CM_sim_perf)
     metrics = get_eval_metrics()
     log_eval_metrics(step, metrics)
     CM_sim_perf = speed_eval
-    Server().send_gui("send CarMaker SetSimTimeAcc %d" % CM_sim_perf)
+    Server().send_gui("SetSimTimeAcc %d" % CM_sim_perf)
     returns.append(metrics["AverageReturn"])
 
   if log_interval and step % log_interval == 0:

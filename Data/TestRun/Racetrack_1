@@ -1,6 +1,6 @@
 #INFOFILE1.1 - Do not remove this line!
 FileIdent = CarMaker-TestRun 9
-FileCreator = CarMaker 9.0.1 2020-6-24
+FileCreator = CarMaker 9.0.2 2020-8-5
 Description:
 	Nurburgring Nordschleife with local road markers like bumps, speed limits, friction stripes)
 Vehicle = Demo_Audi_TT_DCT
@@ -137,7 +137,7 @@ Driver.ParamIdent = IPGDriver 5
 Driver.Mode = std
 Driver.Long.DrivMaxSpeed = 0
 Driver.Long.CruisingSpeed = 20
-Driver.CornerCutCoef = 0.75
+Driver.CornerCutCoef = 0.5
 Driver.ConsiderTraffic = 1
 Driver.Traffic.TimeGapMin = 1.8
 Driver.Traffic.TimeGapMax = 5.0

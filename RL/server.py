@@ -5,7 +5,7 @@ import _thread
 import numpy as np
 from tf_agents.specs import array_spec
 
-import socket
+import socket as socket0
 
 from logger import FastLog
 
@@ -16,21 +16,16 @@ class Server:
     def __init__(self):
         # Connect to CM Simulation
         context = zmq.Context()
-        self.socket = context.socket(zmq.PAIR)
-        self.socket.bind("tcp://*:25555")
+        self.zsocket = context.socket(zmq.PAIR)
+        self.zsocket.bind("tcp://*:25555")
 
         self.not_recieved_attempts = 0
 
-        self.socket.setsockopt( zmq.LINGER,      0 )  # ____POLICY: set upon instantiations
-        self.socket.setsockopt( zmq.AFFINITY,    1 )  # ____POLICY: map upon IO-type thread
-        self.socket.setsockopt( zmq.RCVTIMEO, 250  )
+        self.zsocket.setsockopt( zmq.LINGER,      0 )  # ____POLICY: set upon instantiations
+        self.zsocket.setsockopt( zmq.AFFINITY,    1 )  # ____POLICY: map upon IO-type thread
+        self.zsocket.setsockopt( zmq.RCVTIMEO, 250  )
 
-        # Connect to CM GUI
-        TCP_IP = socket.gethostname()
-        TCP_PORT = 14100
-
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((TCP_IP, TCP_PORT))
+        
 
     def server_step(self, action = [0,0]):
 
@@ -39,7 +34,7 @@ class Server:
 
         while self.not_recieved_attempts < 100:
             try:
-                message = self.socket.recv_string()
+                message = self.zsocket.recv_string()
                 log.server("Recieved request: %s" % message)
                 self.not_recieved_attempts = 0
                 break
@@ -72,12 +67,26 @@ class Server:
         s_ctrl = str(action[0]) + " " + str(action[1])
 
         #log.server("Sending action:" + " %s" % s_ctrl)
-        self.socket.send_string(s_ctrl)
+        self.zsocket.send_string(s_ctrl)
 
         return self.state, self.sim_time
 
     def send_gui (self, msg):
 
-        MESSAGE = "{%s}\n" % msg
+        # Connect to CM GUI
+        TCP_IP = socket0.gethostname()
+        TCP_PORT = 14100
+
+        self.s = socket0.socket(socket0.AF_INET, socket0.SOCK_STREAM)
+        self.s.connect((TCP_IP, TCP_PORT))
+
+        MESSAGE = "eval { %s }\n" % msg
 
         self.s.send(MESSAGE.encode())
+
+        ans = self.s.recv(1024).decode().split('\r')[0]
+
+
+        self.s.close()
+
+        return "%s" % ans[1:]
