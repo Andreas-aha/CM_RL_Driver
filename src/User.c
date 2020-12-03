@@ -1,6 +1,6 @@
 /*
 ******************************************************************************
-**  CarMaker - Version 9.0.1
+**  CarMaker - Version 9.0.2
 **  Vehicle Dynamics Simulation Toolkit
 **
 **  Copyright (C)   IPG Automotive GmbH
@@ -97,6 +97,10 @@
 #include <unistd.h>
 #include <assert.h>
 
+#ifdef BEAM_FCT
+#include <Vehicle/Sensor_Inertial.h>
+#endif
+
 /* @@PLUGIN-BEGIN-INCLUDE@@ - Automatically generated code - don't edit! */
 /* @@PLUGIN-END@@ */
 
@@ -109,9 +113,106 @@ int counter = 1;
 int drvr_counter;
 int ovrwrt_drvr = true;
 
+char ipc_adress[] = "ipc:///tmp/99999";
 
 tUser	User;
 
+#ifdef BEAM_FCT
+static void
+CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
+{
+    tResetPos *rstps = &User.ResetPos;
+    static char FreezeOnce;
+
+    /* low level: nothing to do */
+    if (rstps->Order.now == 0 && rstps->Order.old == 0) {
+	
+	if (FreezeOnce != 0)
+	    FreezeOnce = 0;
+	return;
+
+    /* rising edge: saving current position */
+    } else if (rstps->Order.now == 1 && rstps->Order.old == 0) {
+	
+	/* In order no repositioning during static equilibrium calculation */
+	if (SimCore.State < SCState_StartLastCycle) {
+	    FreezeOnce = 1;
+	    return;
+	}
+
+	Log ("Step0@CycleNo %d: Saving freeze position\n", SimCore.CycleNo);
+	// VEC_Assign(rstps->Freeze.Pos,Car.ConBdy1.t_0);
+	VEC_Assign(rstps->Freeze.Pos,Car.Fr1.t_0);
+	rstps->Freeze.Ang[0] = Car.Roll;
+	rstps->Freeze.Ang[1] = Car.Pitch;
+	rstps->Freeze.Ang[2] = Car.Yaw;
+
+    /* high level: holding current position */
+    } else if (rstps->Order.now == 1 && rstps->Order.old == 1) {
+	
+	/* In order no repositioning during static equilibrium calculation */
+	if (SimCore.State < SCState_StartLastCycle)
+	    return;
+
+	if (FreezeOnce == 0)
+	    Log ("Setting speeds to zero\n");
+	/* -> velocities */
+	VEC_Assign(IF->v_0,Null3x1);
+	VEC_Assign(IF->rv_zyx,Null3x1);
+	
+	if (FreezeOnce == 0) {
+	    Log ("Step1@CycleNo %d: Freezing at pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
+		SimCore.CycleNo,
+		rstps->Freeze.Pos[0], 
+		rstps->Freeze.Pos[1],
+		rstps->Freeze.Pos[2],
+		rstps->Freeze.Ang[0]*rad2deg,
+		rstps->Freeze.Ang[1]*rad2deg,
+		rstps->Freeze.Ang[2]*rad2deg);
+	    Log ("Desire to move to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
+		rstps->New.Pos[0],
+		rstps->New.Pos[1],
+		rstps->New.Pos[2],
+		rstps->New.Ang[0]*rad2deg,
+		rstps->New.Ang[1]*rad2deg,
+		rstps->New.Ang[2]*rad2deg);
+	}
+	
+	/* -> positions */
+	VEC_Assign(IF->t_0,rstps->Freeze.Pos);
+	VEC_Assign(IF->r_zyx,rstps->Freeze.Ang);
+	if (FreezeOnce == 0)
+	    FreezeOnce = 1;
+
+    /* falling edge: moving to indicated position (input) */
+    } else if (rstps->Order.now == 0 && rstps->Order.old == 1) {
+	
+	/* In order no repositioning during static equilibrium calculation */
+	if (SimCore.State < SCState_StartLastCycle)
+	    return;
+	
+	Log ("Starting new simulation in UserPgm\n");
+
+	Log ("Setting speeds to zero\n");
+	/* -> velocities */
+	VEC_Assign(IF->v_0,Null3x1);
+	VEC_Assign(IF->rv_zyx,Null3x1);
+	
+	Log ("Step2@CycleNo %d: Switching to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
+	    SimCore.CycleNo,
+	    rstps->New.Pos[0],
+	    rstps->New.Pos[1],
+	    rstps->New.Pos[2],
+	    rstps->New.Ang[0]*rad2deg,
+	    rstps->New.Ang[1]*rad2deg,
+	    rstps->New.Ang[2]*rad2deg);
+	/* -> positions */
+	VEC_Assign(IF->t_0,rstps->New.Pos);
+	VEC_Assign(IF->r_zyx,rstps->New.Ang);
+    }
+    
+}
+#endif /* BEAM_FCT */
 
 
 /*
@@ -190,6 +291,12 @@ User_ScanCmdLine (int argc, char **argv)
 	    User_PrintUsage(Pgm);
 	    SimCore_PrintUsage(Pgm); /* Possible exit(), depending on CM-platform! */
 	    return  NULL;
+    } else if ( strcmp(*argv, "-servern") == 0 ) {
+	    int server_n = atoi(*++argv);
+        Log("Server: %d\n", server_n);
+        sprintf(ipc_adress, "ipc:///tmp/%d", server_n);
+        Log("%s\n", ipc_adress);
+	    return  NULL;
 	} else if ((*argv)[0] == '-') {
 	    LogErrF(EC_General, "Unknown option '%s'", *argv);
 	    return NULL;
@@ -216,6 +323,10 @@ User_ScanCmdLine (int argc, char **argv)
 int
 User_Init (void)
 {
+    #ifdef BEAM_FCT
+        Set_UserCarMVPreFunc (&CarMVPreFunc_ResetPos);
+    #endif /* BEAM_FCT */
+    
     return 0;
 }
 
@@ -247,6 +358,37 @@ void
 User_DeclQuants (void)
 {
     int i;
+
+    #ifdef BEAM_FCT
+        tDDictEntry *de;
+        tDDefault *df = DDefaultCreate ("User.ResetPos.Order.");
+        tResetPos *rstps = &User.ResetPos;
+
+        de=DDefChar(df, "DVA",	"",	&(rstps->Order.DVA), DVA_IO_In); DDefStates (de, 2, 0);
+        de=DDefChar(df, "now",	"",	&(rstps->Order.now), DVA_None); DDefStates (de, 2, 0);
+        de=DDefChar(df, "old",	"",	&(rstps->Order.old), DVA_None); DDefStates (de, 2, 0);
+        
+        DDefPrefix(df, "User.ResetPos.New.");
+        DDefDouble4(df, "Pos_x",	 "m",	&(rstps->New.Pos[0]), DVA_IO_In);
+        DDefDouble4(df, "Pos_y",	 "m",	&(rstps->New.Pos[1]), DVA_IO_In);
+        DDefDouble4(df, "Pos_z",	 "m",	&(rstps->New.Pos[2]), DVA_IO_In);
+        DDefDouble4(df, "PosO_x",	 "m",	&(rstps->New.PosOffset[0]), DVA_IO_In);
+        DDefDouble4(df, "PosO_y",	 "m",	&(rstps->New.PosOffset[1]), DVA_IO_In);
+        DDefDouble4(df, "PosO_z",	 "m",	&(rstps->New.PosOffset[2]), DVA_IO_In);
+        DDefDouble4(df, "Ang_x",	 "rad",	&(rstps->New.Ang[0]), DVA_IO_In);
+        DDefDouble4(df, "Ang_y",	 "rad",	&(rstps->New.Ang[1]), DVA_IO_In);
+        DDefDouble4(df, "Ang_z",	 "rad",	&(rstps->New.Ang[2]), DVA_IO_In);
+        
+        DDefPrefix(df, "User.ResetPos.Freeze.");
+        DDefDouble4(df, "Pos_x",	 "m",	&(rstps->Freeze.Pos[0]), DVA_None);
+        DDefDouble4(df, "Pos_y",	 "m",	&(rstps->Freeze.Pos[1]), DVA_None);
+        DDefDouble4(df, "Pos_z",	 "m",	&(rstps->Freeze.Pos[2]), DVA_None);
+        DDefDouble4(df, "Ang_x",	 "rad",	&(rstps->Freeze.Ang[0]), DVA_None);
+        DDefDouble4(df, "Ang_y",	 "rad",	&(rstps->Freeze.Ang[1]), DVA_None);
+        DDefDouble4(df, "Ang_z",	 "rad",	&(rstps->Freeze.Ang[2]), DVA_None);
+        
+        DDefaultDelete (df);
+    #endif /* BEAM_FCT */
 
     for (i=0; i<N_USEROUTPUT; i++) {
 	char sbuf[32];
@@ -399,6 +541,47 @@ User_TestRun_Start_atBegin (void)
 int
 User_TestRun_Start_atEnd (void)
 {
+    #ifdef BEAM_FCT
+        tInfos *inf = SimCore.Vhcl.Inf;
+        double tmpvec[3];
+        int i, nRows;
+        char key[255];
+
+        tResetPos *repos =	&User.ResetPos;
+
+        /*** Repositioning ***/
+        User.SensorID = InertialSensor_FindIndexForName("BeamRef");
+
+        /** Search for x-Offset of Sensor of UserPgm
+        *  UserPgm Sensor lays (in this example) on middle
+        *  of rear axle on the ground (Y = Z = 0) **/
+        if (User.SensorID < 0) {
+        LogWarnF(EC_General,"Vhcl_repos: Can't identify body sensor 'BeamRef' in vehicle dataset!\n=> Car.* signal values used (small offset regarding to Sensor.Inertial.BeamRef.* signal values)");
+        } else {
+
+        VEC_Assign(tmpvec,Null3x1);
+
+        /* -> RefPt difference UserPgm/CarMaker (middle rear axle on ground) */
+        sprintf (key, "Sensor.Inertial.%d.pos", User.SensorID);
+        i = iGetTable (inf, key, tmpvec, 3, 1, &nRows);
+        if (i < 0) {
+            LogWarnF (EC_General, "Vhcl_repos: Can't read body sensor 'BeamRef' position!\n=> Try to replace it with rear left wheel carrier position...");
+
+            i = iGetTable (inf, "WheelCarrier.rl.pos", tmpvec, 3, 1, &nRows);
+            if (i < 0) {
+            LogErrF (EC_General, "Vhcl_repos: Can't read rear left wheel carrier position!\n");
+            } else {
+            repos->X_whlcrr = tmpvec[0];
+            Log ("Vhcl_repos PreProc: WheelCarrier.rl.pos = %.3fm\n", repos->X_whlcrr);
+            }
+
+        } else {
+            repos->X_whlcrr = tmpvec[0];
+            Log ("Vhcl_repos PreProc: Sensor.Inertial.%d.pos.x = %.3fm\n", User.SensorID, repos->X_whlcrr);
+        }
+        }
+    #endif /* BEAM_FCT */
+
     return 0;
 }
 
@@ -476,6 +659,15 @@ User_TestRun_RampUp (double dt)
 int
 User_TestRun_End_First (void)
 {
+    #ifdef BEAM_FCT
+        tResetPos *repos =		&User.ResetPos;
+
+        /** Beam funtion **/
+        repos->Order.DVA = 0;
+        repos->Order.now = 0;
+        repos->Order.old = 0;
+    #endif
+        
     return 0;
 }
 
@@ -516,8 +708,34 @@ User_TestRun_End (void)
 void
 User_In (const unsigned CycleNo)
 {
+    #ifdef BEAM_FCT
+        tResetPos *repos =	&User.ResetPos;
+    #endif
+
     if (SimCore.State != SCState_Simulate)
-	return;
+    return;
+
+    #ifdef BEAM_FCT
+        /* control flag */
+        repos->Order.old = repos->Order.now;
+        repos->Order.now = repos->Order.DVA;
+        /* - Flag set, when Init button pressed in UserPgm
+        *   at that moment new valid init coordinates sent
+        * - Flag reset, when Start button pressed in UserPgm */
+
+        /* --- Initialisation phase --- */
+        if (repos->Order.now == 1 && repos->Order.old == 0) {
+            /*** Vehicle repositioning ***/
+            /* input new position to reach: x-y-rz, rx-ry, z */
+            /*** vec(O001) = vec(O0S) - vec(O1S)
+             *** -> vec(O1S) = [rot(Yaw, vec(Z1))]^-1 * t[rot(Pitch, vec(Y2))]^-1 * repos->X_whlcrr * vec(X2) */
+            repos->New.PosOffset[0] = repos->X_whlcrr * cos(repos->New.Ang[1]) * cos(repos->New.Ang[2]);
+            repos->New.PosOffset[1] = repos->X_whlcrr * cos(repos->New.Ang[1]) * sin(repos->New.Ang[2]);
+            repos->New.PosOffset[2] = repos->X_whlcrr *-sin(repos->New.Ang[1]);
+
+            VEC_SubS(repos->New.Pos,repos->New.PosOffset);
+        }
+    #endif /* BEAM_FCT */
 }
 
 
@@ -571,7 +789,7 @@ Send_State (int action)
     }
 
     /* Connect to server */
-    zsock_t *requester = zsock_new_pair("tcp://localhost:25555");
+    zsock_t *requester = zsock_new_pair(ipc_adress);
 
     float LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
                             Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
@@ -580,26 +798,26 @@ Send_State (int action)
     float state_array[] = { \
                             State, \
                             Vehicle.v/60, \
-                            Car.FARoadSensor.Path.Deviation.Dist / (Car.FARoadSensor.Act.Width*0.5), \
+                            Car.FARoadSensor.Path.Deviation.Dist / 10, \
                             Car.FARoadSensor.Path.Deviation.Ang / M_PI, \
                             RoadSensor[10].Path.LongSlope, \
                             RoadSensor[10].Route.CurveXY * 4, \
-                            RoadSensor[10].Path.Deviation.Dist / (RoadSensor[10].Act.Width*0.5), \
+                            RoadSensor[10].Path.Deviation.Dist / 10, \
                             RoadSensor[10].Act.Width/10, \
                             RoadSensor[11].Route.CurveXY * 4, \
-                            RoadSensor[11].Path.Deviation.Dist / (RoadSensor[11].Act.Width*0.5), \
+                            RoadSensor[11].Path.Deviation.Dist / 10, \
                             RoadSensor[11].Act.Width/10, \
-                            RoadSensor[0].Path.Deviation.Dist / (RoadSensor[0].Act.Width*0.5), \
+                            RoadSensor[0].Path.Deviation.Dist / 10, \
                             RoadSensor[0].Route.CurveXY * 4, \
                             RoadSensor[0].Act.Width/10, \
                             RoadSensor[1].Route.CurveXY * 4, \
-                            RoadSensor[1].Path.Deviation.Dist / (RoadSensor[1].Act.Width*0.5), \
+                            RoadSensor[1].Path.Deviation.Dist / 10, \
                             RoadSensor[1].Act.Width/10, \
                             RoadSensor[2].Route.CurveXY * 4, \
-                            RoadSensor[2].Path.Deviation.Dist / (RoadSensor[2].Act.Width*0.5), \
+                            RoadSensor[2].Path.Deviation.Dist / 10, \
                             RoadSensor[2].Act.Width/10, \
                             RoadSensor[3].Route.CurveXY * 4, \
-                            RoadSensor[3].Path.Deviation.Dist / (RoadSensor[3].Act.Width*0.5), \
+                            RoadSensor[3].Path.Deviation.Dist / 10, \
                             RoadSensor[3].Act.Width/10, \
                             RoadSensor[4].Route.CurveXY * 4, \
                             RoadSensor[5].Route.CurveXY * 4, \
@@ -623,28 +841,28 @@ Send_State (int action)
     }
 
     /* Send messsage to server */
-    printf("Sending: ");
+    //printf("Sending: ");
     zstr_send(requester, out_msg);
-    printf("%s\n", out_msg);
+    //printf("%s\n", out_msg);
 
     /* Recieve messsage from server */
     
-    zsock_set_rcvtimeo(requester, 10000);
-    printf("Incoming Message: ");
+    zsock_set_rcvtimeo(requester, 1000);
+    //printf("Incoming Message: ");
     char *buf = zstr_recv(requester);
 
     if (buf == NULL) {
-        printf("No msg\n");
+        // printf("No msg\n");
         zstr_free(&buf);
-        printf("Free\n");
+        // printf("Free\n");
         zsock_destroy(&requester);
-        printf("Destroyed\n");
+        // printf("Destroyed\n");
         char *buf1 = "0 0";
-        printf("buf1 created\n");
+        // printf("buf1 created\n");
         return buf1;
     }
     else {
-        printf("%s\n", buf);
+        // printf("%s\n", buf);
         zsock_destroy(&requester);
         return buf;
     }
@@ -680,7 +898,7 @@ User_VehicleControl_Calc (double dt)
         if (Car.FARoadSensor.Act.Width <= abs(Car.FARoadSensor.Path.Deviation.Dist)*2 || abs(Car.FARoadSensor.Path.Deviation.Ang) > 1) {
 
             if (ovrwrt_drvr) {
-                printf("Control given to IPG Driver because left road\n");
+                // printf("Control given to IPG Driver because left road\n");
 
                 ovrwrt_drvr = false;
                 Send_State(1);
@@ -703,7 +921,7 @@ User_VehicleControl_Calc (double dt)
             if (w<0)
                 Log("No DVA write to Car.SlotCar.Deviation possible\n");   
 
-        printf("Checking if car in good pos\n");
+        // printf("Checking if car in good pos\n");
         if ((Car.FARoadSensor.Act.Width*0.2 >= abs(Car.FARoadSensor.Path.Deviation.Dist)*2) && (abs(Car.FARoadSensor.Path.Deviation.Ang) < 0.04)) {
           
             drvr_counter++;
@@ -722,7 +940,7 @@ User_VehicleControl_Calc (double dt)
                 if (w<0)
                     Log("No DVA write to VC.Lights.IndL possible\n");
                 
-                printf("RF Learning again\n");
+                // printf("RF Learning again\n");
             }
             }
 
@@ -766,7 +984,7 @@ User_VehicleControl_Calc (double dt)
         }
 
 
-        printf("Values: %f %f\n", user_gas, user_steer);
+        // printf("Values: %f %f\n", user_gas, user_steer);
 
         /* Overwrite vehicle control */
 
