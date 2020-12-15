@@ -166,7 +166,7 @@ Driver.DecShift.nEngine.Shift:
 Driver.Lat.DevMax = 0.0
 Driver.Lat.tReact = 0.0
 Driver.Knowl.Long.tActionMin = 0.5
-Driver.Knowl.Lat.StWhlAngleMax = 12
+Driver.Knowl.Lat.StWhlAngleMax = 2
 Driver.Knowl.Lat.StWhlAngleVelMax = 1500
 Driver.Knowl.Lat.StWhlAngleAccMax = 20000
 Driver.Learn.VehicleLimits.TestRun = Racetrack_1
