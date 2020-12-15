@@ -1,9 +1,9 @@
 #INFOFILE1.1 - Do not remove this line!
 FileIdent = CarMaker-TestRun 9
-FileCreator = CarMaker 9.0.2 2020-8-5
+FileCreator = CarMaker 9.1 2020-10-20
 Description:
 	Nurburgring Nordschleife with local road markers like bumps, speed limits, friction stripes)
-Vehicle = Demo_Audi_TT_DCT
+Vehicle = RL_IPG_CompanyCar
 Trailer =
 Tire.0 =
 Tire.1 =
@@ -25,7 +25,7 @@ TrailerLoad.1.mass = 0.0
 TrailerLoad.1.pos = 0.0 0.0 0.0
 TrailerLoad.2.mass = 0.0
 TrailerLoad.2.pos = 0.0 0.0 0.0
-DrivMan.Init.Velocity = 10
+DrivMan.Init.Velocity = 20
 DrivMan.Init.GearNo = 0
 DrivMan.Init.SteerAng = 0
 DrivMan.Init.LaneOffset = 0
@@ -34,9 +34,10 @@ DrivMan.Init.OperatorState = drive
 DrivMan.VhclOperator.Kind = IPGOperator 1
 DrivMan.nDMan = 1
 DrivMan.0.Info = Driving
-DrivMan.0.TimeLimit = 21100
-DrivMan.0.LongDyn = Driver 0 0
-DrivMan.0.LatDyn = Driver 0
+DrivMan.0.TimeLimit = 2110000
+DrivMan.0.LongDyn = Driver 1 0
+DrivMan.0.LatDyn = Step 0.0 0.0 0.0 abs 0
+DrivMan.0.SteerMode = Angle
 Traffic.IFF.FName =
 Traffic.IFF.Time.Name =
 Traffic.N = 0
@@ -82,10 +83,10 @@ ErrorClass.11.WarningLimit = 3 5.0
 ErrorClass.12.Action = ignore
 ErrorClass.12.Save =
 ErrorClass.12.WarningLimit = 3 5.0
-Road.FName = Route_5.rd5
-Road.VhclStartPos = 0.00 0 0
-Road.VhclRoute = Route_1
-Road.RouteId = 1
+Road.FName = Route_8.rd5
+Road.VhclStartPos = 0 0 0
+Road.VhclRoute = Route_0
+Road.RouteId = 0
 Env.StartTime.Year = 2014
 Env.StartTime.Month = 1
 Env.StartTime.Day = 1
@@ -134,11 +135,11 @@ Env.Temp.Offset_Time:
 	23.0 -1.6
 	24.0 -2.0
 Driver.ParamIdent = IPGDriver 5
-Driver.Mode = std
-Driver.Long.DrivMaxSpeed = 0
-Driver.Long.CruisingSpeed = 20
-Driver.CornerCutCoef = 0.5
-Driver.ConsiderTraffic = 1
+Driver.Mode = race
+Driver.Long.DrivMaxSpeed = 1
+Driver.Long.CruisingSpeed = 250
+Driver.CornerCutCoef = 1
+Driver.ConsiderTraffic = 0
 Driver.Traffic.TimeGapMin = 1.8
 Driver.Traffic.TimeGapMax = 5.0
 Driver.Traffic.DistMin = 6
@@ -147,130 +148,141 @@ Driver.Traffic.EcoCoef = 0.75
 Driver.Traffic.Overtake = 0
 Driver.Traffic.Overtake_Rate = 1
 Driver.Traffic.Overtake_dSpeedMin = 10
-Driver.Long.dtAccBrake = 0.75
-Driver.Long.axMax = 2.0
-Driver.Long.axMin = -2.0
-Driver.Long.ayMax = 3.0
+Driver.Long.dtAccBrake = 0.25
+Driver.Long.axMax = 4.0
+Driver.Long.axMin = -6.0
+Driver.Long.ayMax = 5.0
 Driver.Long.GGExp:
-	50 0.5 0.5
+	50 1.5 1.5
 Driver.Long.DevMax = 0.0
 Driver.Long.tReact = 0.0
-Driver.Long.TractionControl = 1
+Driver.Long.TractionControl = 0
 Driver.DecShift.UseBrakePark = 1
-Driver.DecShift.tSwitchGear = 1.5
+Driver.DecShift.tSwitchGear = 0.5
 Driver.DecShift.nEngine.Limits:
-	1000 3000
+	2500 5000
 Driver.DecShift.nEngine.Shift:
-	1500 2000
+	3000 4500
 Driver.Lat.DevMax = 0.0
 Driver.Lat.tReact = 0.0
-Driver.Knowl.Long.tActionMin = 8
-Driver.Knowl.Lat.StWhlAngleMax = 630
-Driver.Knowl.Lat.StWhlAngleVelMax = 250
-Driver.Knowl.Lat.StWhlAngleAccMax = 1500
-Driver.Learn.VehicleLimits.TestRun = Examples/BasicFunctions/Maneuvers/RecordAndReplay/ReplaySpeedProfile
-Driver.Learn.VehicleLimits.Date = 1491922416
-Driver.Learn.ControllerDyn.TestRun = Examples/BasicFunctions/Maneuvers/RecordAndReplay/ReplaySpeedProfile
-Driver.Learn.ControllerDyn.Date = 1491922416
+Driver.Knowl.Long.tActionMin = 0.5
+Driver.Knowl.Lat.StWhlAngleMax = 12
+Driver.Knowl.Lat.StWhlAngleVelMax = 1500
+Driver.Knowl.Lat.StWhlAngleAccMax = 20000
+Driver.Learn.VehicleLimits.TestRun = Racetrack_1
+Driver.Learn.VehicleLimits.Date = 1607617846
+Driver.Learn.ControllerDyn.TestRun = Racetrack_1
+Driver.Learn.ControllerDyn.Date = 1607617846
 Driver.Learn.MaxSpeed.TestRun =
 Driver.Learn.MaxSpeed.Date =
 Driver.Learn.Remember = 1
 Driver.Learn.Friction = 1.0
-Driver.Learn.G2GearNo = 0
-Driver.Learn.G3GearNo = 0
+Driver.Learn.G2GearNo = 2
+Driver.Learn.G3GearNo = 3
 Driver.Knowl.Info =
-Driver.Knowl.Vehicle.iDiff = 4.10000
-Driver.Knowl.Vehicle.rWheel = 0.29300
-Driver.Knowl.Vehicle.iFGear = 3.40000	1.90000	1.35000	1.05000	0.80000
-Driver.Knowl.Vehicle.iBGear = -4.00000
+Driver.Knowl.Vehicle.iDiff = 2.78800
+Driver.Knowl.Vehicle.rWheel = 0.33636
+Driver.Knowl.Vehicle.iFGear = 4.82200	2.82000	1.81500	1.28400	1.00000	0.85600
+Driver.Knowl.Vehicle.iBGear = -4.82200
 Driver.Knowl.Vehicle.Aero.Factor_axAccel = 1.100
 Driver.Knowl.Vehicle.Aero.Factor_axDecel = 0.800
 Driver.Knowl.Vehicle.Aero.Factor_ay = 0.950
 Driver.Knowl.Vehicle.Aero:
-	20.00 4.65 -9.25 8.23
-	30.00 4.71 -9.25 8.31
-	40.00 4.68 -9.25 8.40
-	50.00 4.29 -9.26 8.48
-	60.00 3.46 -9.26 8.57
-	70.00 2.94 -9.26 8.66
-	80.00 2.72 -9.27 8.72
-	90.00 2.48 -9.29 8.74
-	100.00 2.17 -9.30 8.73
-	110.00 1.94 -9.32 8.72
-	120.00 1.78 -9.34 8.71
-	130.00 1.59 -9.36 8.70
-	140.00 1.41 -9.38 8.69
-	150.00 1.28 -9.41 8.67
-	160.00 1.15 -9.43 8.65
-	170.00 1.04 -9.45 8.64
-	180.00 1.00 -9.48 8.63
-	190.00 0.99 -9.51 8.66
-	200.00 1.00 -9.55 8.71
-	210.00 1.00 -9.57 8.76
-	220.00 1.00 -9.59 8.80
-	230.00 1.00 -9.59 8.85
-	240.00 1.00 -9.59 8.89
-Driver.Knowl.Lat.tPreview = 0.525
+	20.00 8.38 -10.95 10.15
+	30.00 8.43 -10.95 10.21
+	40.00 8.46 -10.96 10.26
+	50.00 8.28 -10.96 10.32
+	60.00 7.45 -10.96 10.38
+	70.00 6.06 -10.97 10.44
+	80.00 5.38 -11.00 10.47
+	90.00 5.17 -11.03 10.47
+	100.00 4.77 -11.07 10.45
+	110.00 4.00 -11.12 10.43
+	120.00 3.43 -11.16 10.40
+	130.00 3.23 -11.22 10.37
+	140.00 3.15 -11.27 10.34
+	150.00 2.97 -11.33 10.29
+	160.00 2.58 -11.39 10.24
+	170.00 2.11 -11.46 10.17
+	180.00 1.86 -11.53 10.11
+	190.00 1.75 -11.60 10.05
+	200.00 1.65 -11.68 10.00
+	210.00 1.51 -11.75 9.94
+	220.00 1.30 -11.85 9.91
+	230.00 1.08 -11.97 9.92
+	240.00 1.00 -12.12 9.95
+	250.00 0.99 -12.30 9.98
+	260.00 1.00 -12.39 10.01
+	270.00 1.00 -12.40 10.04
+	280.00 1.00 -12.39 10.06
+	290.00 1.00 -12.39 10.09
+Driver.Knowl.Lat.tPreview = 0.481
 Driver.Knowl.Lat.tYawPro = 0.019
-Driver.Knowl.Lat.tPreDyn = 0.094
-Driver.Knowl.Lat.LimitSideSlip = 11.909
+Driver.Knowl.Lat.tPreDyn = 0.080
+Driver.Knowl.Lat.LimitSideSlip = 9.414
 Driver.Knowl.Lat.StWhlTorqueAmplify = 1.000
 Driver.Knowl.Lat.StWhlTorqueAmplifyC = 1.000
 Driver.Knowl.Lat.StWhlTorqueAmplifyV = 1.000
-Driver.Knowl.Long.tPreviewAcc = 1.147
-Driver.Knowl.Long.tPreviewBra = 0.697
+Driver.Knowl.Long.tPreviewAcc = 0.763
+Driver.Knowl.Long.tPreviewBra = 0.636
 Driver.Knowl.Long.tPreEngDyn = 0.030
-Driver.Knowl.Long.tPreBraDyn = 0.038
-Driver.Knowl.Long.tPreEngDead = 0.001
-Driver.Knowl.Long.tPreBraDead = 0.019
-Driver.Knowl.Long.ThrottlePfP = 0.0
-Driver.Knowl.Long.BrakePfP = 0.0
+Driver.Knowl.Long.tPreBraDyn = 0.098
+Driver.Knowl.Long.tPreEngDead = 0.000
+Driver.Knowl.Long.tPreBraDead = 0.000
+Driver.Knowl.Long.ThrottlePfP = 0.000
+Driver.Knowl.Long.BrakePfP = 0.000
 Driver.Knowl.Long.SlipMax:
-	41.42 9.05 5.19
-	75.73 9.39 5.39
-	108.18 9.19 5.27
-	143.21 9.05 5.20
-	181.00 8.72 5.00
+	43.05 4.66 2.67
+	78.08 4.98 2.85
+	111.73 4.95 2.84
+	146.96 4.81 2.76
+	184.63 4.65 2.66
+	219.94 4.49 2.58
 Driver.Learn.Engine.TrqMax:
-	6121 143.64
-	4569 161.60
-	4446 158.87
-	4442 150.16
-	3933 130.85
+	3615 335.59
+	3547 371.65
+	3425 367.50
+	3196 337.61
+	2857 290.86
+	2633 246.88
 Driver.Learn.Engine.PwrMax:
-	6151 92.3205
-	5977 90.7298
-	5969 86.3669
-	5738 76.8016
-	4950 61.1633
-Driver.Learn.nEngineIdle = 800
-Driver.Learn.nEngineMax = 7959
+	6058 202.1607
+	6027 218.2236
+	6021 199.1906
+	5010 147.4072
+	3824 100.3305
+	3196 75.9838
+Driver.Learn.nEngineIdle = 806
+Driver.Learn.nEngineMax = 7135
 Driver.Learn.nEngine.MaxSpeed:
-	800 7135
-	2312 6799
-	3292 6604
-	3431 6681
-	2828 7959
+	806 6629
+	2543 6574
+	3686 6520
+	3974 6412
+	3653 5895
+	2888 7135
 Driver.Learn.nEngine.Standard:
 	0 0
 	0 0
 	0 0
 	0 0
 	0 0
-Driver.Learn.vIdle = 6.338
-Driver.Learn.vMax = 239.409
-Driver.Learn.vG2nEng025 = 37.237
-Driver.Learn.vG2nEng075 = 88.704
-Driver.Learn.axBra_vG2nEng05 = -9.249
-Driver.Learn.axAccG2 = 2.203
-Driver.Learn.axDragG1 = 0.5
-Driver.Learn.tYawPro_YawAcc = 35.237
-Driver.Learn.tYawPro_StWhlA = 11.828
-Driver.Learn.vnEng05 = 35	63	88	114	146
-Driver.Learn.axAccMax = 4.67	2.94	2.05	1.51	1.00
-Driver.Learn.ayMax = 0.00	8.66	8.74	8.71	8.69
-Driver.Learn.StWhlA_ayMax = 0.00	195.74	101.62	78.18	67.65
-Driver.Learn.PT_Kind = 0
-Driver.Learn.PT_h_COG = 0.629
-Driver.Learn.PT_SlipMax = 9.242	9.242	0.000	0.000
+	0 0
+Driver.Learn.vIdle = 7.594
+Driver.Learn.vMax = 280.046
+Driver.Learn.vG2nEng025 = 38.834
+Driver.Learn.vG2nEng075 = 90.284
+Driver.Learn.axBra_vG2nEng05 = -10.937
+Driver.Learn.axAccG2 = 4.986
+Driver.Learn.axDragG1 = 0.821
+Driver.Learn.tYawPro_YawAcc = 46.347
+Driver.Learn.tYawPro_StWhlA = 11.901
+Driver.Learn.vnEng05 = 38	64	100	141	181	209
+Driver.Learn.axAccMax = 8.38	5.43	3.46	2.25	1.51	1.09
+Driver.Learn.ayMax = 0.00	10.33	10.49	10.43	10.30	10.11
+Driver.Learn.StWhlA_ayMax = 0.00	222.45	123.90	98.39	87.69	81.87
+Driver.Learn.PT_Kind = 1
+Driver.Learn.PT_h_COG = 0.583
+Driver.Learn.PT_SlipMax = 0.000	0.000	3.007	3.074
 Driver.Learn.NEng_S = 1
+Driver.RL.Driver = 0
