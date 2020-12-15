@@ -24,7 +24,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
     if mode is 'evaluate':
       self.max_EpSteps = 6000
     else:
-      self.max_EpSteps = 10000
+      self.max_EpSteps = 800
 
     self.gamma = gamma
     self.RTFac = RTFac

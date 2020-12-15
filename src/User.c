@@ -1117,7 +1117,6 @@ User_VehicleControl_Calc (double dt)
                 tRoadRouteIn CheckST;
                 CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
                 CheckST.st[1] = 0;
-                CheckST.st[0] = 0;
 
                 //printf("S: %f\n", CheckST.st[0]);
 
@@ -1186,7 +1185,6 @@ User_VehicleControl_Calc (double dt)
             tRoadRouteIn CheckST;
             CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
             CheckST.st[1] = 0;
-            CheckST.st[0] = 0;
 
             //printf("S: %f\n", CheckST.st[0]);
 
@@ -1311,7 +1309,7 @@ User_Calc (double dt)
     double steerang_vel;
 
     // TODO: Steering.IF.AngVel ist immer null workaround
-    steerang_vel = Steering.IF.AngVel + user_steer_acc;
+    steerang_vel = user_steer_acc;
     if (steerang_vel > M_PI/1000) {
         steerang_vel = M_PI/1000;
     }
