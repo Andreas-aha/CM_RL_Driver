@@ -97,9 +97,8 @@
 #include <unistd.h>
 #include <assert.h>
 
-#ifdef BEAM_FCT
+#include <Vehicle/Sensor_Line.h>
 #include <Vehicle/Sensor_Inertial.h>
-#endif
 
 /* @@PLUGIN-BEGIN-INCLUDE@@ - Automatically generated code - don't edit! */
 /* @@PLUGIN-END@@ */
@@ -108,16 +107,82 @@
 
 const char* Send_State (int action);
 
+
 int UserCalcCalledByAppTestRunCalc = 0;
-int counter = 1;
+unsigned int counter = 1;
 int drvr_counter;
 int ovrwrt_drvr = true;
+struct tRL_Agent {
+    int On;
+};
+struct tRL_Agent RL_Agent = {
+    .On = true
+};
 
 char ipc_adress[] = "ipc:///tmp/99999";
 
+double LS_F;
+
 tUser	User;
 
-#ifdef BEAM_FCT
+void
+RoadBorderDist (tRoadEval *re1, tRoadEval *re2, double *in, double deg)
+{
+
+    int max_loops = 360;
+
+    double MyVhclPos_Cos;
+    double MyVhclPos_Sin;
+    double Res;
+    double alpha;
+    tRoadGeoIn gIn;
+    tRoadGeoOut gOut;
+
+    tRoadGeoIn gIn2;
+    tRoadGeoOut gOut2;
+
+    double LSMarkerPos_Add = 3;
+
+    alpha = deg*deg2rad;
+
+    Res = LSMarkerPos_Add/100;
+
+
+    M_SINCOS(Vehicle.Yaw + alpha, &MyVhclPos_Sin, &MyVhclPos_Cos);
+
+    gIn.xyz[0]= Vehicle.PoI_Pos[0] + LSMarkerPos_Add * MyVhclPos_Cos;
+    gIn.xyz[1]= Vehicle.PoI_Pos[1] + LSMarkerPos_Add * MyVhclPos_Sin;
+    gIn.xyz[2]= Vehicle.PoI_Pos[2];
+
+    gIn2.xyz[0]= Vehicle.PoI_Pos[0] + (LSMarkerPos_Add + Res) * MyVhclPos_Cos;
+    gIn2.xyz[1]= Vehicle.PoI_Pos[1] + (LSMarkerPos_Add + Res) * MyVhclPos_Sin;
+    gIn2.xyz[2]= Vehicle.PoI_Pos[2];
+
+    RoadGeoEval (re1, NULL, &gIn, &gOut);
+    RoadGeoEval (re2, NULL, &gIn2, &gOut2);
+
+    int loops = 0;
+    while (gOut.onRoad != 1 && loops <= max_loops) {
+        loops++;
+        Res = LSMarkerPos_Add/100;
+        LSMarkerPos_Add -= Res*0.99;
+        gIn.xyz[0]= Vehicle.PoI_Pos[0] + LSMarkerPos_Add * MyVhclPos_Cos;
+        gIn.xyz[1]= Vehicle.PoI_Pos[1] + LSMarkerPos_Add * MyVhclPos_Sin;
+        RoadGeoEval (re1, NULL, &gIn, &gOut);
+    }
+    while (gOut2.onRoad == 1 && loops <= max_loops) {
+        loops++;
+        Res = LSMarkerPos_Add/100;
+        LSMarkerPos_Add += Res*0.99;
+        gIn2.xyz[0]= Vehicle.PoI_Pos[0] + (LSMarkerPos_Add + Res) * MyVhclPos_Cos;
+        gIn2.xyz[1]= Vehicle.PoI_Pos[1] + (LSMarkerPos_Add + Res) * MyVhclPos_Sin;
+        RoadGeoEval (re2, NULL, &gIn2, &gOut2);
+    }
+    
+    *in = LSMarkerPos_Add;
+}
+
+
 static void
 CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 {
@@ -193,11 +258,14 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 	
 	Log ("Starting new simulation in UserPgm\n");
 
-	Log ("Setting speeds to zero\n");
 	/* -> velocities */
-	VEC_Assign(IF->v_0,Null3x1);
+    double speed_0[3];
+    double speed_fac = (double)rand()/(double)(RAND_MAX/30);
+	Log ("Setting speed to %.2f m/s\n", speed_fac);
+    VEC_Mul(speed_0, EX3x1, 0);
+	VEC_Assign(IF->v_0,speed_0);
 	VEC_Assign(IF->rv_zyx,Null3x1);
-	
+
 	Log ("Step2@CycleNo %d: Switching to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
 	    SimCore.CycleNo,
 	    rstps->New.Pos[0],
@@ -212,8 +280,42 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
     }
     
 }
-#endif /* BEAM_FCT */
 
+
+void
+Calc_sRoad_Distance ()
+{
+    if (counter <= 2) {
+        sRoad_StartPos = Vehicle.sRoad;
+    }
+
+    if (Vehicle.sRoad < 1 && sRoad_Distance > 0 && !LapOrder) {
+        LapNo++;
+        LapOrder = 1;
+    }
+
+    if (Vehicle.sRoad > 1) {
+        LapOrder = 0;
+    }
+    double sRoad_Distance_old = sRoad_Distance;
+    sRoad_Distance = Vehicle.sRoad + LapNo * Env.Route.Length - sRoad_StartPos;
+
+    if (!CheckRoadBorderDist()) {
+        reward_factor = 1/(1 + fabs(Car.ConBdy1.SideSlipAngle)*4);
+        reward = (sRoad_Distance - sRoad_Distance_old) * 10 * reward_factor;
+    }
+    else {
+        reward_factor = 1;
+        reward =  -Vehicle.v * Vehicle.v *0.01;
+    }
+}
+
+void
+Reset_sRoad_Distance () {
+    sRoad_Distance = 0;
+    sRoad_StartPos = 0;
+    LapNo = 0;
+}
 
 /*
 ** User_Init_First ()
@@ -326,7 +428,8 @@ User_Init (void)
     #ifdef BEAM_FCT
         Set_UserCarMVPreFunc (&CarMVPreFunc_ResetPos);
     #endif /* BEAM_FCT */
-    
+
+
     return 0;
 }
 
@@ -389,6 +492,23 @@ User_DeclQuants (void)
         
         DDefaultDelete (df);
     #endif /* BEAM_FCT */
+
+    DDefInt(NULL , "RL_Agent.On" , "-", &(RL_Agent.On) , DVA_IO_In);
+    DDefDouble4(NULL , "RL_Agent.Reward" , "-", &(reward), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.Reward_Factor" , "-", &(reward_factor), DVA_None);
+
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.0" , "m", &(LSMarkerPos_Add_00), DVA_None);
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.L90" , "m", &(LSMarkerPos_Add_L90), DVA_None);
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.L60" , "m", &(LSMarkerPos_Add_L60), DVA_None);
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.L30" , "m", &(LSMarkerPos_Add_L30), DVA_None);
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.R90" , "m", &(LSMarkerPos_Add_R90), DVA_None);
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.R60" , "m", &(LSMarkerPos_Add_R60), DVA_None);
+    DDefDouble4(NULL , "UserTest.RoadBorderDist.R30" , "m", &(LSMarkerPos_Add_R30), DVA_None);
+
+    DDefDouble4(NULL , "UserTest.Road.DrivenDistance" , "m", &(sRoad_Distance), DVA_None);
+    DDefDouble4(NULL , "UserTest.Road.sRoad_StartPos" , "m", &(sRoad_StartPos), DVA_None);
+    DDefDouble4(NULL , "UserTest.Road.LapLength" , "m", &(Env.Route.Length), DVA_None);
+    DDefInt(NULL , "UserTest.Road.LapNo" , "-", &(LapNo), DVA_None);
 
     for (i=0; i<N_USEROUTPUT; i++) {
 	char sbuf[32];
@@ -541,6 +661,34 @@ User_TestRun_Start_atBegin (void)
 int
 User_TestRun_Start_atEnd (void)
 {
+    CheckPath_at_s = RoadNewRoadEval (Env.Road, ROAD_BUMP_ALL, ROAD_OT_EXT, NULL);
+    RoadEvalSetRouteByObjId (CheckPath_at_s, Env.Route.ObjId, 1);
+
+    OnRoadSens_RE_00_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_00_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+
+
+    OnRoadSens_RE_L90_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_L90_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_L60_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_L60_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_L30_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_L30_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+
+    OnRoadSens_RE_R90_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_R90_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_R60_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_R60_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_R30_1 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+    OnRoadSens_RE_R30_2 = RoadNewRoadEval (Env.Road, ROAD_BUMP_NONE, ROAD_OT_MIN, NULL);
+
+    LSMarkerPos_Add_00 = 2.;
+    LSMarkerPos_Add_L90 = 2.;
+    LSMarkerPos_Add_L60 = 2.;
+    LSMarkerPos_Add_L30 = 2.;
+    LSMarkerPos_Add_R90 = 2.;
+    LSMarkerPos_Add_R60 = 2.;
+    LSMarkerPos_Add_R30 = 2.;
     #ifdef BEAM_FCT
         tInfos *inf = SimCore.Vhcl.Inf;
         double tmpvec[3];
@@ -610,6 +758,7 @@ User_TestRun_Start_StaticCond_Calc (void)
 int
 User_TestRun_Start_Finalize (void)
 {
+
     return 0;
 }
 
@@ -689,6 +838,25 @@ User_TestRun_End_First (void)
 int
 User_TestRun_End (void)
 {
+    RoadDeleteRoadEval(CheckPath_at_s);
+
+    RoadDeleteRoadEval(OnRoadSens_RE_00_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_00_2);
+    RoadDeleteRoadEval(OnRoadSens_RE_L90_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_L90_2);
+    RoadDeleteRoadEval(OnRoadSens_RE_L60_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_L60_2);
+    RoadDeleteRoadEval(OnRoadSens_RE_L30_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_L30_2);
+    RoadDeleteRoadEval(OnRoadSens_RE_R90_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_R90_2);
+    RoadDeleteRoadEval(OnRoadSens_RE_R60_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_R60_2);
+    RoadDeleteRoadEval(OnRoadSens_RE_R30_1);
+    RoadDeleteRoadEval(OnRoadSens_RE_R30_2);
+
+    Reset_sRoad_Distance ();
+
     return 0;
 }
 
@@ -755,7 +923,7 @@ User_DrivMan_Calc (double dt)
        the vehicle in driving state using the IPG's
        PowerTrain Control model 'Generic' or similar */
     if (Vehicle.OperationState != OperState_Driving)
-	return 0;
+	    return 0;
 
     return 0;
 }
@@ -776,9 +944,9 @@ const char*
 Send_State (int action)
 {
     float State;
-    char out_msg[256] = {'\0'};
+    char out_msg[1024] = {'\0'};
     char *loc = out_msg;
-    size_t out_msg_BufferSpace = 256;
+    size_t out_msg_BufferSpace = 1024;
     size_t tempLen;
 
     switch(action) {
@@ -791,43 +959,38 @@ Send_State (int action)
     /* Connect to server */
     zsock_t *requester = zsock_new_pair(ipc_adress);
 
-    float LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
+    double LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
                             Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
 
     /* Define message to server */
-    float state_array[] = { \
-                            State, \
-                            Vehicle.v/60, \
-                            Car.FARoadSensor.Path.Deviation.Dist / 10, \
-                            Car.FARoadSensor.Path.Deviation.Ang / M_PI, \
-                            RoadSensor[10].Path.LongSlope, \
-                            RoadSensor[10].Route.CurveXY * 4, \
-                            RoadSensor[10].Path.Deviation.Dist / 10, \
-                            RoadSensor[10].Act.Width/10, \
-                            RoadSensor[11].Route.CurveXY * 4, \
-                            RoadSensor[11].Path.Deviation.Dist / 10, \
-                            RoadSensor[11].Act.Width/10, \
-                            RoadSensor[0].Path.Deviation.Dist / 10, \
-                            RoadSensor[0].Route.CurveXY * 4, \
-                            RoadSensor[0].Act.Width/10, \
-                            RoadSensor[1].Route.CurveXY * 4, \
-                            RoadSensor[1].Path.Deviation.Dist / 10, \
-                            RoadSensor[1].Act.Width/10, \
-                            RoadSensor[2].Route.CurveXY * 4, \
-                            RoadSensor[2].Path.Deviation.Dist / 10, \
-                            RoadSensor[2].Act.Width/10, \
-                            RoadSensor[3].Route.CurveXY * 4, \
-                            RoadSensor[3].Path.Deviation.Dist / 10, \
-                            RoadSensor[3].Act.Width/10, \
-                            RoadSensor[4].Route.CurveXY * 4, \
-                            RoadSensor[5].Route.CurveXY * 4, \
-                            RoadSensor[6].Route.CurveXY * 4, \
-                            RoadSensor[7].Route.CurveXY * 4, \
-                            RoadSensor[8].Route.CurveXY * 4, \
-                            RoadSensor[9].Route.CurveXY * 4, \
-                            Steering.IF.Ang / (3.5 * M_PI), \
-                            LongSlip / 4, \
-                            Car.ConBdy1.SideSlipAngle / M_PI_2 \
+    double state_array[] = { 
+                            State,
+                            sRoad_Distance,
+                            Vehicle.v/6,
+                            InertialSensor[0].Acc_0[0] ,
+                            InertialSensor[0].Acc_0[1] ,
+                            Steering.IF.Ang,
+                            Steering.IF.AngVel,
+                            LongSlip,
+                            Car.ConBdy1.SideSlipAngle,
+                            Car.FARoadSensor.Route.Deviation.Ang,
+                            LSMarkerPos_Add_00 / 6,
+                            LSMarkerPos_Add_L90 / 6,
+                            LSMarkerPos_Add_L60 / 6,
+                            LSMarkerPos_Add_L30 / 6,
+                            LSMarkerPos_Add_R90 / 6,
+                            LSMarkerPos_Add_R60 / 6,
+                            LSMarkerPos_Add_R30 / 6,
+                            RoadSensor[0].Route.CurveXY * 40,
+                            //RoadSensor[1].Route.CurveXY * 40,
+                            //RoadSensor[2].Route.CurveXY * 40,
+                            //RoadSensor[3].Route.CurveXY * 40,
+                            RoadSensor[4].Route.CurveXY * 40,
+                            //RoadSensor[5].Route.CurveXY * 40,
+                            //RoadSensor[6].Route.CurveXY * 40,
+                            //RoadSensor[7].Route.CurveXY * 40,
+                            RoadSensor[8].Route.CurveXY * 40,
+                            //RoadSensor[9].Route.CurveXY * 40
     };
 
 
@@ -835,7 +998,7 @@ Send_State (int action)
     int i;
     for(i = 0; i < DIM(state_array); ++i)
     {
-        snprintf(loc, out_msg_BufferSpace, "%.4f ", state_array[i]);
+        snprintf(loc, out_msg_BufferSpace, "%.5lf ", state_array[i]);
         tempLen = strlen(loc);
         loc += tempLen;
     }
@@ -847,7 +1010,7 @@ Send_State (int action)
 
     /* Recieve messsage from server */
     
-    zsock_set_rcvtimeo(requester, 1000);
+    zsock_set_rcvtimeo(requester, 250);
     //printf("Incoming Message: ");
     char *buf = zstr_recv(requester);
 
@@ -872,6 +1035,49 @@ Send_State (int action)
 }
 
 /*
+** Update_RoadSensorPrevDist ()
+**
+** called
+** - in RT context
+** - in User_VehicleControl_Calc()
+** 
+** Changes PreviewDist of RoadSensor 0-9
+** according to Vehicle.v
+*/
+void
+Update_RoadSensorPrevDist () 
+{
+    RoadSensor[0].PreviewDist = 1 + Vehicle.v * 1.0;
+    RoadSensor[1].PreviewDist = 1 + Vehicle.v * 1.2;
+    RoadSensor[2].PreviewDist = 1 + Vehicle.v * 1.4;
+    RoadSensor[3].PreviewDist = 1 + Vehicle.v * 1.6;
+    RoadSensor[4].PreviewDist = 1 + Vehicle.v * 1.8;
+    RoadSensor[5].PreviewDist = 1 + Vehicle.v * 2.0;
+    RoadSensor[6].PreviewDist = 1 + Vehicle.v * 2.2;
+    RoadSensor[7].PreviewDist = 1 + Vehicle.v * 2.4;
+    RoadSensor[9].PreviewDist = 1 + Vehicle.v * 2.8;
+    RoadSensor[8].PreviewDist = 1 + Vehicle.v * 2.6;
+}
+
+int
+CheckRoadBorderDist ()
+{
+    double MinDist = 1.5;
+    int res;
+
+    if (LSMarkerPos_Add_00 < 2) res = -1;
+    else if (LSMarkerPos_Add_L30 < MinDist) res =  -1;
+    else if (LSMarkerPos_Add_L60 < MinDist) res =  -1;
+    else if (LSMarkerPos_Add_L90 < MinDist) res =  -1;
+    else if (LSMarkerPos_Add_R30 < MinDist) res =  -1;
+    else if (LSMarkerPos_Add_R60 < MinDist) res =  -1;
+    else if (LSMarkerPos_Add_R90 < MinDist) res =  -1;
+    else res =  0;
+
+    return res;
+}
+
+/*
 ** User_VehicleControl_Calc ()
 **
 ** called
@@ -890,15 +1096,14 @@ User_VehicleControl_Calc (double dt)
     if (SimCore.State != SCState_Simulate)
 	    return 0;
 
-    int evry_n;
+    Update_RoadSensorPrevDist ();
+    int evry_n = 125;
     int w;
 
-    if (ovrwrt_drvr && SimCore.Time > 1) {
-
-        if (Car.FARoadSensor.Act.Width <= abs(Car.FARoadSensor.Path.Deviation.Dist)*2 || abs(Car.FARoadSensor.Path.Deviation.Ang) > 1) {
-
-            if (ovrwrt_drvr) {
-                // printf("Control given to IPG Driver because left road\n");
+    if(counter % 25 == 0) {
+        if (ovrwrt_drvr && SimCore.Time > 1) {
+            if (CheckRoadBorderDist() == -1 || fabs(Car.FARoadSensor.Route.Deviation.Ang) > 1.) {
+                //printf("Porting car 1\n");
 
                 ovrwrt_drvr = false;
                 Send_State(1);
@@ -906,85 +1111,112 @@ User_VehicleControl_Calc (double dt)
                 w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 2, NULL);
                 if (w<0)
                     Log("No DVA write to VC.Lights.IndL possible\n");
-            }
 
+                // Reset pos via DVA to Start Pos:
+
+                tRoadRouteIn CheckST;
+                CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
+                CheckST.st[1] = 0;
+                CheckST.st[0] = 0;
+
+                //printf("S: %f\n", CheckST.st[0]);
+
+                tRoadRouteOutExt Out_CheckST;
+                w = RoadRouteEvalExt (CheckPath_at_s, NULL, RIT_ST, &CheckST, &Out_CheckST);
+                if (w<0)
+                    Log("RoadRouteEval Error #%d\n",w);
+
+                double rx, ry, rz;
+                NEV2FreiZYX (&Out_CheckST.suv[0], &Out_CheckST.suv[1], &Out_CheckST.suv[2], &rx,&ry, &rz);
+
+                //printf("X: %f, Y: %f, RX: %f, RY: %f, RZ: %f\n", Out_CheckST.xyz[0], Out_CheckST.xyz[1], rx, ry, rz);
+
+                tResetPos *rstps = &User.ResetPos;
+                rstps->New.Pos[0] = Out_CheckST.xyz[0];
+                rstps->New.Pos[1] = Out_CheckST.xyz[1];
+                rstps->New.Pos[2] = Out_CheckST.xyz[2];
+                rstps->New.Ang[0] = Out_CheckST.nuv[0];
+                rstps->New.Ang[1] = Out_CheckST.nuv[1];
+                rstps->New.Ang[2] = rz;
+                rstps->Order.DVA = 1;
+
+            }
+        }
+        else if (!ovrwrt_drvr) {
+            w = DVA_WriteRequest("User.ResetPos.Order.DVA", OWMode_Abs, 0, 0, 0, 0, NULL);
+                if (w<0)
+                    Log("No DVA write to User.ResetPos.Order.DVA possible\n");
+
+            ovrwrt_drvr = true;
+            counter = 1;
+            Reset_sRoad_Distance();
+            return 0;
         }
     }
 
-    if (!ovrwrt_drvr) {
-
-        w = DVA_WriteRequest("Car.SlotCar.Deviation", OWMode_Abs, 500, 0, 0, Car.FARoadSensor.Act.Width/2, NULL);
-            if (w<0)
-                Log("No DVA write to Car.SlotCar.Deviation possible\n");
-
-        w = DVA_WriteRequest("Car.SlotCar.State", OWMode_Abs, 500, 0, 0, true, NULL);
-            if (w<0)
-                Log("No DVA write to Car.SlotCar.Deviation possible\n");   
-
-        // printf("Checking if car in good pos\n");
-        if ((Car.FARoadSensor.Act.Width*0.2 >= abs(Car.FARoadSensor.Path.Deviation.Dist)*2) && (abs(Car.FARoadSensor.Path.Deviation.Ang) < 0.04)) {
-          
-            drvr_counter++;
-
-            if (drvr_counter > 5000) {
-                w = DVA_WriteRequest("DM.Gas", OWMode_Abs, 100, 0, 0, 0, NULL);
-                if (w<0)
-                    Log("No DVA write to DM.Gas possible\n");
-
-
-            if (Vehicle.v <= 20) {
-                drvr_counter = 0;
-                ovrwrt_drvr = true;
-
-                w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 0, NULL);
-                if (w<0)
-                    Log("No DVA write to VC.Lights.IndL possible\n");
-                
-                // printf("RF Learning again\n");
-            }
-            }
-
-            
-        
-        }
-        
-    }
-
-    if (ovrwrt_drvr) {
-        evry_n = 125;
+    if (!RL_Agent.On) {
+        return 0;
     }
 
     /*  Send UAQs to RL-server and request new control input
         Run only every n cycle for performance */
     if(counter % evry_n == 0 && ovrwrt_drvr) {
-
-        w = DVA_WriteRequest("Car.SlotCar.State", OWMode_Abs, evry_n, 0, 0, false, NULL);
-            if (w<0)
-                Log("No DVA write to Car.SlotCar.Deviation possible\n");  
-
-        w = DVA_WriteRequest("Car.SlotCar.Deviation", OWMode_Abs, evry_n, 0, 0, -1, NULL);
-            if (w<0)
-                Log("No DVA write to Car.SlotCar.Deviation possible\n");
-
         int r;
 
         
         double user_gas;
         double user_brake;
-        double user_steer;
- 
+        double user_steer_acc_roh;
+
         char* pEnd;
         user_gas = strtod (Send_State(0), &pEnd);
-        user_steer = strtod (pEnd, &pEnd);
+        user_steer_acc_roh = strtod (pEnd, &pEnd);
+        user_steer_acc = user_steer_acc_roh/1000;
 
-        if (user_gas > 4 && user_steer > 4) {
+        if (user_gas > 4 && user_steer_acc_roh > 4) {
             ovrwrt_drvr = false;
-            user_gas = 0;
-            user_steer = 0;
+            Send_State(1);
+
+            w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 2, NULL);
+            if (w<0)
+                Log("No DVA write to VC.Lights.IndL possible\n");
+
+            // Reset pos via DVA to Start Pos:
+
+            tRoadRouteIn CheckST;
+            CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
+            CheckST.st[1] = 0;
+            CheckST.st[0] = 0;
+
+            //printf("S: %f\n", CheckST.st[0]);
+
+            tRoadRouteOutExt Out_CheckST;
+            w = RoadRouteEvalExt (CheckPath_at_s, NULL, RIT_ST, &CheckST, &Out_CheckST);
+            if (w<0)
+                Log("RoadRouteEval Error #%d\n",w);
+
+            double rx, ry, rz;
+            NEV2FreiZYX (&Out_CheckST.suv[0], &Out_CheckST.suv[1], &Out_CheckST.suv[2], &rx,&ry, &rz);
+
+            //printf("X: %f, Y: %f, RX: %f, RY: %f, RZ: %f\n", Out_CheckST.xyz[0], Out_CheckST.xyz[1], rx, ry, rz);
+
+            tResetPos *rstps = &User.ResetPos;
+            rstps->New.Pos[0] = Out_CheckST.xyz[0];
+            rstps->New.Pos[1] = Out_CheckST.xyz[1];
+            rstps->New.Pos[2] = Out_CheckST.xyz[2];
+            rstps->New.Ang[0] = Out_CheckST.nuv[0];
+            rstps->New.Ang[1] = Out_CheckST.nuv[1];
+            rstps->New.Ang[2] = rz;
+            rstps->Order.DVA = 1;
+
+            DrivMan.Gas = 0.;
+            DrivMan.Brake = 0;
+            DrivMan.Steering.Ang = 0;
+            return 0;
         }
 
 
-        // printf("Values: %f %f\n", user_gas, user_steer);
+        // printf("Values: %f %f\n", user_gas, user_steer_acc);
 
         /* Overwrite vehicle control */
 
@@ -1005,28 +1237,7 @@ User_VehicleControl_Calc (double dt)
             if (r<0)
                 Log("No DVA write to DM.Gas possible\n");
         }
-
-        double steerang;
-        steerang = Steering.IF.Ang + user_steer;
-        if (steerang > 9) {
-            steerang = 9;
-        }
-        else if (steerang < -9)
-        {
-            steerang = -9;
-        }
         
-
-        r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, evry_n, 0, 0, steerang, NULL);
-        if (r<0)
-            Log("No DVA write to DM.Steer possible\n");
-        
-    }
-
-    counter++;
-
-    if (counter > 10000) {
-        counter = 1;
     }
 
     return 0;
@@ -1082,14 +1293,50 @@ User_Traffic_Calc (double dt)
 int
 User_Calc (double dt)
 {
-    /* Starting with CM 6.0 User_Calc() will be invoked in EVERY simulation
-       state. Uncomment the following line in order to restore the behaviour
-       of CM 5.1 and earlier. */
-    /*if (!UserCalcCalledByAppTestRunCalc) return 0;*/
+    if (SimCore.State != SCState_Simulate) return 0;
+
+    if(counter % 25 == 0) {
+        RoadBorderDist(OnRoadSens_RE_L90_1, OnRoadSens_RE_L90_2, &LSMarkerPos_Add_L90, 90.);
+        RoadBorderDist(OnRoadSens_RE_L60_1, OnRoadSens_RE_L60_2, &LSMarkerPos_Add_L60, 60.);
+        RoadBorderDist(OnRoadSens_RE_L30_1, OnRoadSens_RE_L30_2, &LSMarkerPos_Add_L30, 30.);
+        RoadBorderDist(OnRoadSens_RE_R90_1, OnRoadSens_RE_R90_2, &LSMarkerPos_Add_R90, -90.);
+        RoadBorderDist(OnRoadSens_RE_R60_1, OnRoadSens_RE_R60_2, &LSMarkerPos_Add_R60, -60.);
+        RoadBorderDist(OnRoadSens_RE_R30_1, OnRoadSens_RE_R30_2, &LSMarkerPos_Add_R30, -30.);
+        RoadBorderDist(OnRoadSens_RE_00_1, OnRoadSens_RE_00_2, &LSMarkerPos_Add_00, 0.);
+    }
+
+    Calc_sRoad_Distance();
+
+    double steerang;
+    double steerang_vel;
+
+    // TODO: Steering.IF.AngVel ist immer null workaround
+    steerang_vel = Steering.IF.AngVel + user_steer_acc;
+    if (steerang_vel > M_PI/1000) {
+        steerang_vel = M_PI/1000;
+    }
+    else if (steerang_vel < -M_PI/1000)
+    {
+        steerang_vel = -M_PI/1000;
+    }
+    steerang = Steering.IF.Ang + steerang_vel;
+    if (steerang > 8) {
+        steerang = 8;
+    }
+    else if (steerang < -8)
+    {
+        steerang = -8;
+    }
+    
+    int r;
+    r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, 1, 0, 0, steerang, NULL);
+    if (r<0)
+        Log("No DVA write to DM.Steer possible\n");
+
+    counter++;
 
     return 0;
 }
-
 
 
 /*
@@ -1190,7 +1437,6 @@ User_ApoMsg_Eval (int Ch, char *Msg, int len, int who)
 #endif
     return -1;
 }
-
 
 
 /*

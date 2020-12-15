@@ -27,14 +27,90 @@ extern int UserCalcCalledByAppTestRunCalc;
 
 #define N_USEROUTPUT	10
 
+void RoadBorderDist (tRoadEval*, tRoadEval*, double *, double);
+void Calc_sRoad_Distance (void);
+void Reset_sRoad_Distance (void);
+int CheckRoadBorderDist (void);
+
+tRoadEval *CheckPath_at_s;
+
+tRoadEval *OnRoadSens_RE_00_1;
+tRoadEval *OnRoadSens_RE_00_2;
+
+tRoadEval *OnRoadSens_RE_L90_1;
+tRoadEval *OnRoadSens_RE_L90_2;
+
+tRoadEval *OnRoadSens_RE_L60_1;
+tRoadEval *OnRoadSens_RE_L60_2;
+
+tRoadEval *OnRoadSens_RE_L30_1;
+tRoadEval *OnRoadSens_RE_L30_2;
+
+
+tRoadEval *OnRoadSens_RE_R90_1;
+tRoadEval *OnRoadSens_RE_R90_2;
+
+tRoadEval *OnRoadSens_RE_R60_1;
+tRoadEval *OnRoadSens_RE_R60_2;
+
+tRoadEval *OnRoadSens_RE_R30_1;
+tRoadEval *OnRoadSens_RE_R30_2;
+
+double LSMarkerPos_Add_00;
+
+double LSMarkerPos_Add_L90;
+double LSMarkerPos_Add_L60;
+double LSMarkerPos_Add_L30;
+
+double LSMarkerPos_Add_R90;
+double LSMarkerPos_Add_R60;
+double LSMarkerPos_Add_R30;
+
+double sRoad_Distance;
+double sRoad_StartPos;
+double LapLength;
+int LapOrder;
+int LapNo;
+
+double reward;
+double reward_factor;
+
+double user_steer_acc;
+
+/* -> Repositioning */
+typedef struct {
+    struct {
+	char DVA;
+	char now;
+	char old;
+    } Order;
+    struct {
+	double Pos[3], Ang[3];
+    } Freeze;
+    struct {
+	double Pos[3], PosOffset[3], Ang[3];
+    } New;
+    /* Offset, X-Lage of rear wheel carrier,
+     * an offset exists due to pitch. */
+    double X_whlcrr;	/* diff Refpt UserPgm/CarMaker */
+    //double RefPos[3];	/* diff pt ConBdy/Refpt */
+} tResetPos;
+
+
 /* Struct for user variables. */
 typedef struct tUser {
     /* For debugging purposes */
     double Out[N_USEROUTPUT];
+
+    /* Ego repositioning by reset */
+    tResetPos	ResetPos;
+    int		SensorID;
+
 } tUser;
 
 extern tUser User;
 
+void Update_RoadSensorPrevDist (void);
 
 int 	User_Init_First		(void);
 int 	User_Init		(void);

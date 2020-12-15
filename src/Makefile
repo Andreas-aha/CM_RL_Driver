@@ -13,9 +13,9 @@
 #**
 #******************************************************************************
 
-include /opt/ipg/carmaker/linux64-9.0.2/include/MakeDefs.linux64
+include /opt/ipg/carmaker/linux64-9.1/include/MakeDefs.linux64
 
-APP_VER =		"Car_Generic <insert.your.version.no>"
+APP_VER =		"Car_Generic RL_Driver"
 APP_NAME =		CarMaker.$(ARCH)$(EXE_EXT)
 
 OPT_CFLAGS =		-g -O1
@@ -41,6 +41,11 @@ OBJS =			CM_Main.o CM_Vehicle.o User.o
 # @@PLUGIN-END@@
 
 ### END (Linking with RTW-built Simulink models)
+
+
+### User Example Defines:
+
+DEF_CFLAGS +=		-DBEAM_FCT
 
 
 default:	$(APP_NAME)
