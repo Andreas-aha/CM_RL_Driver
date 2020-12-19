@@ -114,6 +114,8 @@ int drvr_counter;
 int ovrwrt_drvr = true;
 struct tRL_Agent {
     int On;
+    double gas;
+    double steer;
 };
 struct tRL_Agent RL_Agent = {
     .On = true
@@ -496,6 +498,8 @@ User_DeclQuants (void)
     DDefInt(NULL , "RL_Agent.On" , "-", &(RL_Agent.On) , DVA_IO_In);
     DDefDouble4(NULL , "RL_Agent.Reward" , "-", &(reward), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Reward_Factor" , "-", &(reward_factor), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.Steer" , "-", &(RL_Agent.steer), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.Gas" , "-", &(RL_Agent.gas), DVA_None);
 
     DDefDouble4(NULL , "UserTest.RoadBorderDist.0" , "m", &(LSMarkerPos_Add_00), DVA_None);
     DDefDouble4(NULL , "UserTest.RoadBorderDist.L90" , "m", &(LSMarkerPos_Add_L90), DVA_None);
@@ -970,7 +974,7 @@ Send_State (int action)
                             InertialSensor[0].Acc_0[0] ,
                             InertialSensor[0].Acc_0[1] ,
                             Steering.IF.Ang,
-                            Steering.IF.AngVel,
+                            0.,
                             LongSlip,
                             Car.ConBdy1.SideSlipAngle,
                             Car.FARoadSensor.Route.Deviation.Ang,
@@ -998,7 +1002,7 @@ Send_State (int action)
     int i;
     for(i = 0; i < DIM(state_array); ++i)
     {
-        snprintf(loc, out_msg_BufferSpace, "%.5lf ", state_array[i]);
+        snprintf(loc, out_msg_BufferSpace, "%.16lf ", state_array[i]);
         tempLen = strlen(loc);
         loc += tempLen;
     }
@@ -1117,6 +1121,7 @@ User_VehicleControl_Calc (double dt)
                 tRoadRouteIn CheckST;
                 CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
                 CheckST.st[1] = 0;
+                CheckST.st[0] = 5;
 
                 //printf("S: %f\n", CheckST.st[0]);
 
@@ -1172,6 +1177,9 @@ User_VehicleControl_Calc (double dt)
         user_steer_acc_roh = strtod (pEnd, &pEnd);
         user_steer_acc = user_steer_acc_roh/1000;
 
+        RL_Agent.gas = user_gas;
+        RL_Agent.steer = user_steer_acc_roh;
+
         if (user_gas > 4 && user_steer_acc_roh > 4) {
             ovrwrt_drvr = false;
             Send_State(1);
@@ -1185,7 +1193,7 @@ User_VehicleControl_Calc (double dt)
             tRoadRouteIn CheckST;
             CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
             CheckST.st[1] = 0;
-
+            CheckST.st[0] = 5;
             //printf("S: %f\n", CheckST.st[0]);
 
             tRoadRouteOutExt Out_CheckST;
@@ -1206,10 +1214,6 @@ User_VehicleControl_Calc (double dt)
             rstps->New.Ang[1] = Out_CheckST.nuv[1];
             rstps->New.Ang[2] = rz;
             rstps->Order.DVA = 1;
-
-            DrivMan.Gas = 0.;
-            DrivMan.Brake = 0;
-            DrivMan.Steering.Ang = 0;
             return 0;
         }
 
@@ -1304,6 +1308,9 @@ User_Calc (double dt)
     }
 
     Calc_sRoad_Distance();
+
+    if (!RL_Agent.On) 
+        return 0;
 
     double steerang;
     double steerang_vel;
