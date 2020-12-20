@@ -1,0 +1,96 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent = CarMaker-OutputQuantities 1
+
+DStore.Format = ascii
+DStore.Compression = none
+DStore.dt.fast = 0.001
+DStore.dt.normal = 0.1
+DStore.dt.slow = 0.1
+
+DStore.Quantities.fast:
+DStore.Quantities.normal:
+	Car.ax
+	Car.ay
+	Car.FxFL
+	Car.FxFR
+	Car.FxRL
+	Car.FxRR
+	Car.FyFL
+	Car.FyFR
+	Car.FyRL
+	Car.FyRR
+	Car.FzFL
+	Car.FzFR
+	Car.FzRL
+	Car.FzRR
+	Car.Pitch
+	Car.Road.Lane.Act.tMidLane
+	Car.Road.Lane.Act.Type
+	Car.Road.Lane.Act.Width
+	Car.Road.Lane.OnLeft.tMidLane
+	Car.Road.Lane.OnLeft.Type
+	Car.Road.Lane.OnLeft.Width
+	Car.Road.Lane.OnRight.tMidLane
+	Car.Road.Lane.OnRight.Type
+	Car.Road.Lane.OnRight.Width
+	Car.Road.Route.DevAng
+	Car.Road.sRoad
+	Car.Roll
+	Car.SideSlipAngle
+	DM.Brake
+	DM.Clutch
+	DM.Gas
+	DM.GearNo
+	DM.Shifting
+	DM.Steer.Ang
+	PT.Engine.rotv
+	RL_Agent.Gas
+	RL_Agent.On
+	RL_Agent.Reward
+	RL_Agent.Reward_Factor
+	RL_Agent.Steer
+	SC.State
+	SC.TAccel
+	Sensor.Road.RD001.PreviewDist
+	Sensor.Road.RD001.Route.CurveXY
+	Sensor.Road.RD002.Path.CurveXY
+	Sensor.Road.RD002.PreviewDist
+	Sensor.Road.RD003.PreviewDist
+	Sensor.Road.RD003.Route.CurveXY
+	Sensor.Road.RD004.PreviewDist
+	Sensor.Road.RD004.Route.CurveXY
+	Sensor.Road.RD005.PreviewDist
+	Sensor.Road.RD005.Route.CurveXY
+	Sensor.Road.RD006.PreviewDist
+	Sensor.Road.RD006.Route.CurveXY
+	Sensor.Road.RD007.PreviewDist
+	Sensor.Road.RD007.Route.CurveXY
+	Sensor.Road.RD008.PreviewDist
+	Sensor.Road.RD008.Route.CurveXY
+	Sensor.Road.RD009.PreviewDist
+	Sensor.Road.RD009.Route.CurveXY
+	Sensor.Road.RD010.PreviewDist
+	Sensor.Road.RD010.Route.CurveXY
+	Time
+	UserTest.Road.DrivenDistance
+	UserTest.Road.LapLength
+	UserTest.Road.sRoad_StartPos
+	UserTest.RoadBorderDist.0
+	UserTest.RoadBorderDist.L30
+	UserTest.RoadBorderDist.L60
+	UserTest.RoadBorderDist.L90
+	UserTest.RoadBorderDist.R30
+	UserTest.RoadBorderDist.R60
+	UserTest.RoadBorderDist.R90
+	VC.Lights.IndL
+	Vhcl.FL.LongSlip
+	Vhcl.FR.LongSlip
+	Vhcl.PoI.x
+	Vhcl.PoI.y
+	Vhcl.RL.LongSlip
+	Vhcl.RR.LongSlip
+	Vhcl.sRoad
+	Vhcl.tRoad
+	Vhcl.v
+	Vhcl.Yaw
+DStore.Quantities.slow:

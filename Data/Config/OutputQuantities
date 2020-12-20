@@ -1,0 +1,80 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent = CarMaker-OutputQuantities 1
+
+DStore.Format = ascii
+DStore.Compression = none
+DStore.dt.fast = 0.001
+DStore.dt.normal = 0.1
+DStore.dt.slow = 0.1
+
+DStore.Quantities.fast:
+DStore.Quantities.normal:
+	Brake.Hyd.Sys.pMC
+	Car.ax
+	Car.ay
+	Car.Distance
+	Car.Fr1.rx
+	Car.Fr1.ry
+	Car.Fr1.rz
+	Car.Fr1.tx
+	Car.Fr1.ty
+	Car.Fr1.tz
+	Car.Gen.ax_1
+	Car.Gen.ay_1
+	Car.Gen.vx_1
+	Car.Pitch
+	Car.Roll
+	Car.SideSlipAngle
+	Car.tx
+	Car.ty
+	Car.v
+	Car.vFL
+	Car.vFR
+	Car.vRL
+	Car.vRR
+	Car.Yaw
+	Car.YawRate
+	DM.Brake
+	DM.BrakeLever
+	DM.Clutch
+	DM.Gas
+	DM.GearNo
+	DM.ManDist
+	DM.ManNo
+	DM.Steer.Ang
+	DM.Steer.Trq
+	PT.Clutch.Trq_out
+	PT.Control.Consump.Fuel.Abs
+	PT.Control.Consump.Fuel.Act
+	PT.Control.Consump.Fuel.Avg
+	PT.Engine.be
+	PT.Engine.rot
+	PT.Engine.rotv
+	PT.Engine.Trq
+	PwrD.Tire.CambDeflFL
+	PwrD.Tire.CambDeflFR
+	PwrD.Tire.LatSlipFL
+	PwrD.Tire.LatSlipFR
+	PwrD.Tire.LongSlipFL
+	PwrD.Tire.LongSlipFR
+	PwrD.Tire.RollResistFL
+	PwrD.Tire.RollResistFR
+	PwrD.Tire.ToeSlipFL
+	PwrD.Tire.ToeSlipFR
+	PwrD.Tire.TotalFL
+	PwrD.Tire.TotalFR
+	PwrL.Aero
+	PwrL.Brake
+	PwrL.PT
+	PwrL.Tire
+	PwrL.Total
+	PwrS.Aero
+	PwrS.Brake
+	PwrS.PT
+	PwrS.Tire
+	PwrS.Total
+	Steer.WhlAng
+	Vhcl.PoI.x
+	Vhcl.PoI.y
+	Vhcl.sRoad
+DStore.Quantities.slow:

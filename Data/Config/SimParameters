@@ -1,0 +1,5 @@
+#INFOFILE1.1 - Do not remove this line!
+FileIdent =	CarMaker-SimParameters	3
+
+
+DStore.OutputQuantities = RL_Data
