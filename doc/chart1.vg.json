@@ -1,0 +1,419 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Plotting CM Data",
+  "width": 800,
+  "height": 650,
+  "padding": 35,
+
+  "config": {
+    "axis": {
+      "domain": false,
+      "labelFontSize": 14,
+      "tickSize": 0
+    }
+  },
+
+  "data": [
+    {
+      "name": "RoadData",
+      "url": "Data/route_8.json",
+      "transform": [
+        { "type": "extent", "field": "Road_l_x", "signal": "xext" },
+        { "type": "extent", "field": "Road_l_x", "signal": "yext" }
+      ]
+    },
+    {
+      "name": "RLVhclData",
+      "url": "Data/RL_Racetrack_1_132446_1400k.csv",
+      "format": {"type": "tsv", "parse": "auto"},
+      "transform": [
+        {"type": "filter", "expr": "datum['Time'] <= timeslider + timer"}
+      ]
+    },
+    {
+      "name": "IPGVhclData",
+      "url": "Data/IPG_Racetrack_1_133254.json",
+      "transform": [
+        {"type": "filter", "expr": "datum['Time'] <= timeslider + timer"}
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "xscale", "zero": false,
+      "padding": 20,
+      "domain": {"signal": "xdom"},
+      "range": {"signal": "xrange"}
+    },
+    {
+      "name": "yscale", "zero": false,
+      "padding": 20,
+      "domain": {"signal": "ydom"},
+      "range": {"signal": "yrange"}
+    },
+    {
+      "name": "color",
+      "type": "linear",
+      "range": {"scheme": "Viridis"},
+      "domain": {"data": "IPGVhclData", "field": "Vhcl\\.v"}
+    }
+  ],
+
+  "axes": [
+    {
+      "orient": "top",
+      "scale": "xscale",
+      "tickCount": 8,
+      "grid": true,
+      "offset": {"signal": "xoffset"}
+    },
+    {
+      "orient": "right",
+      "scale": "yscale",
+      "tickCount": 8,
+      "grid": true,
+      "offset": {"signal": "yoffset"}
+    }
+  ],
+
+  "legends": [
+    {
+      "fill": "color",
+      "type": "gradient",
+      "title": "Vhcl.v [m/s]",
+      "titleFontSize": 12,
+      "titlePadding": 4,
+      "gradientLength": {"signal": "height - 16"}
+    }
+  ],
+
+  "marks": [
+    {
+      "name": "road_left_side",
+      "type": "line",
+      "interpolate": "basis",
+      "from": {"data": "RoadData"},
+      "clip": true,
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Road_l_x"},
+          "y": {"scale": "yscale", "field": "Road_l_y"},
+          "stroke": {"value": "grey"},
+          "strokeWidth":{"signal": "linesize"}
+        }       
+      }
+    },
+    {
+      "name": "road_right_side",
+      "type": "line",
+      "interpolate": "basis",
+      "from": {"data": "RoadData"},
+      "clip": true,
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Road_r_x"},
+          "y": {"scale": "yscale", "field": "Road_r_y"},
+          "stroke": {"value": "grey"},
+          "strokeWidth":{"signal": "linesize"}
+        }
+       
+      }
+    },
+    {
+      "name": "RLVhclPos",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData"},
+      "encode": {
+        "update": {
+          "tooltip": {"field": "Vhcl\\.v"},
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/2"},
+          "opacity": {"signal": "show_rldriver"}
+        }
+      }
+    },
+    {
+      "name": "RLVhclOffsetLine",
+      "type": "line",
+      "interpolate": "cardinal",
+      "clip": true,
+      "from": {"data": "RLVhclData"},
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum['Vhcl\\.PoI\\.x'] - datum['DM\\.Steer\\.Ang']* 20 * sin(datum['Vhcl\\.Yaw'])",
+            "scale": "xscale"
+          },
+          "y": {
+            "signal": "datum['Vhcl\\.PoI\\.y'] + datum['DM\\.Steer\\.Ang']* 20 * cos(datum['Vhcl\\.Yaw'])",
+            "scale": "yscale"
+          },
+          "strokeWidth":{"signal": "linesize"},
+          "opacity": {"signal": "show_rldriver_steer"}
+        }
+      }
+    },
+    {
+      "name": "IPGVhclPos",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "IPGVhclData"},
+      "encode": {
+        "update": {
+          "tooltip": {"field": "Vhcl\\.v"},
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "arrow"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/2"},
+          "opacity": {"signal": "show_ipgdriver"}
+        }
+      }
+    },
+    {
+      "name": "IPGVhclOffsetLine",
+      "type": "line",
+      "interpolate": "cardinal",
+      "clip": true,
+      "from": {"data": "IPGVhclData"},
+      "encode": {
+        "update": {
+          "x": {
+            "signal": "datum['Vhcl\\.PoI\\.x'] - datum['DM\\.Steer\\.Ang']* 20 * sin(datum['Vhcl\\.Yaw'])",
+            "scale": "xscale"
+          },
+          "y": {
+            "signal": "datum['Vhcl\\.PoI\\.y'] + datum['DM\\.Steer\\.Ang']* 20 * cos(datum['Vhcl\\.Yaw'])",
+            "scale": "yscale"
+          },
+          "strokeWidth":{"signal": "linesize"},
+          "stroke":{"value": "red"},
+          "opacity": {"signal": "show_ipgdriver_steer"}
+        }
+      }
+    }
+  ],
+  
+  "signals": [
+    {
+      "name": "margin",
+      "value": 20
+    },
+    {
+      "name": "hover",
+      "on": [
+        {"events": "*:mouseover", "encode": "hover"},
+        {"events": "*:mouseout",  "encode": "leave"},
+        {"events": "*:mousedown", "encode": "select"},
+        {"events": "*:mouseup",   "encode": "release"}
+      ]
+    },
+    {
+      "name": "xoffset",
+      "update": "-(height + padding.bottom)"
+    },
+    {
+      "name": "yoffset",
+      "update": "-(width + padding.left)"
+    },
+    { "name": "xrange", "update": "[0, width]" },
+    { "name": "yrange", "update": "[height, 0]" },
+
+    {
+      "name": "down", "value": null,
+      "on": [
+        {"events": "touchend", "update": "null"},
+        {"events": "mousedown, touchstart", "update": "xy()"}
+      ]
+    },
+    {
+      "name": "xcur", "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "slice(xdom)"
+        }
+      ]
+    },
+    {
+      "name": "ycur", "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "slice(ydom)"
+        }
+      ]
+    },
+    {
+      "name": "delta", "value": [0, 0],
+      "on": [
+        {
+          "events": [
+            {
+              "source": "window", "type": "mousemove", "consume": true,
+              "between": [{"type": "mousedown"}, {"source": "window", "type": "mouseup"}]
+            },
+            {
+              "type": "touchmove", "consume": true,
+              "filter": "event.touches.length === 1"
+            }
+          ],
+          "update": "down ? [down[0]-x(), y()-down[1]] : [0,0]"
+        }
+      ]
+    },
+
+    {
+      "name": "anchor", "value": [0, 0],
+      "on": [
+        {
+          "events": "wheel",
+          "update": "[invert('xscale', x()), invert('yscale', y())]"
+        },
+        {
+          "events": {"type": "touchstart", "filter": "event.touches.length===2"},
+          "update": "[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]"
+        }
+      ]
+    },
+    {
+      "name": "zoom", "value": 1,
+      "on": [
+        {
+          "events": "wheel!",
+          "force": true,
+          "update": "pow(1.004, event.deltaY * pow(16, event.deltaMode))"
+        },
+        {
+          "events": {"signal": "dist2"},
+          "force": true,
+          "update": "dist1 / dist2"
+        }
+      ]
+    },
+    {
+      "name": "dist1", "value": 0,
+      "on": [
+        {
+          "events": {"type": "touchstart", "filter": "event.touches.length===2"},
+          "update": "pinchDistance(event)"
+        },
+        {
+          "events": {"signal": "dist2"},
+          "update": "dist2"
+        }
+      ]
+    },
+    {
+      "name": "dist2", "value": 0,
+      "on": [{
+        "events": {"type": "touchmove", "consume": true, "filter": "event.touches.length===2"},
+        "update": "pinchDistance(event)"
+      }]
+    },
+
+    {
+      "name": "xdom", "update": "slice(xext)",
+      "on": [
+        {
+          "events": {"signal": "delta"},
+          "update": "[xcur[0] + span(xcur) * delta[0] / width, xcur[1] + span(xcur) * delta[0] / width]"
+        },
+        {
+          "events": {"signal": "zoom"},
+          "update": "[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]"
+        }
+      ]
+    },
+    {
+      "name": "ydom", "update": "slice(yext)",
+      "on": [
+        {
+          "events": {"signal": "delta"},
+          "update": "[ycur[0] + span(ycur) * delta[1] / height, ycur[1] + span(ycur) * delta[1] / height]"
+        },
+        {
+          "events": {"signal": "zoom"},
+          "update": "[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]"
+        }
+      ]
+    },
+    {
+      "name": "size",
+      "update": "clamp(100000 / span(xdom), 1, 10000)"
+    },
+    {
+      "name": "linesize",
+      "update": "clamp(400 / span(xdom), 1, 1000)"
+    },
+    {
+      "name": "show_rldriver",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver"
+      }
+    },
+    {
+      "name": "show_rldriver_steer",
+      "value": 0,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver Steering"
+      }
+    },
+    {
+      "name": "show_ipgdriver",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show IPG-Driver"
+      }
+    },
+    {
+      "name": "show_ipgdriver_steer",
+      "value": 0,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show IPG-Driver Steering"
+      }
+    },
+    {
+      "name": "timeslider",
+      "init": "0",
+      "bind":{
+        "input": "range",
+        "name": "Cars at Time:",
+        "min": 0,
+        "max": 140,
+        "step": 0.1
+      }
+    },
+    {
+      "name": "timer",
+      "value": 0,
+      "on": [{"events": {"type": "timer", "throttle": 100}, "update": "timer + play_speed/10"}]
+    },
+    {
+      "name": "play_speed",
+      "value": 0,
+      "bind":{
+        "input": "range",
+        "name": "Playback Speed:",
+        "min": -3,
+        "max": 3,
+        "step": 0.1
+      }
+    }
+  ]
+
+}
