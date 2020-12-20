@@ -1,7 +1,6 @@
 **/.tmp*
 **/*.mp4
 bin/
-Data/Config/
 Data/Script/Examples/
 Data/TestRun/BackAndForth
 Movie/Camera.cfg
@@ -56,3 +55,4 @@ rl_data/train/events.out.tfevents.1605701742.aha-Z97X-UD3H.39997.3699.v2
 rl_data/train/events.out.tfevents.1605704538.aha-Z97X-UD3H.44547.843.v2
 rl_data/train/events.out.tfevents.1605704542.aha-Z97X-UD3H.44547.3699.v2
 rl_data/
+movie.avi
