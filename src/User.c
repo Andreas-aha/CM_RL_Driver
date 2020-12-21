@@ -116,12 +116,16 @@ struct tRL_Agent {
     int On;
     double gas;
     double steer;
+    int Episodes;
+    zsock_t *rt_pair;
+    zsock_t *nrt_pair;
 };
 struct tRL_Agent RL_Agent = {
     .On = true
 };
 
-char ipc_adress[] = "ipc:///tmp/99999";
+char ipc_adress[] = "ipc:///tmp/99999999999";
+char ipc_adress_nrt[] = "ipc:///tmp/99999999999";
 
 double LS_F;
 
@@ -397,9 +401,11 @@ User_ScanCmdLine (int argc, char **argv)
 	    return  NULL;
     } else if ( strcmp(*argv, "-servern") == 0 ) {
 	    int server_n = atoi(*++argv);
+        int server_n_nrt = server_n + 100;
         Log("Server: %d\n", server_n);
         sprintf(ipc_adress, "ipc:///tmp/%d", server_n);
-        Log("%s\n", ipc_adress);
+        sprintf(ipc_adress_nrt, "ipc:///tmp/%d", server_n_nrt);
+        Log("RT: %s NonRT: %s\n", ipc_adress, ipc_adress_nrt);
 	    return  NULL;
 	} else if ((*argv)[0] == '-') {
 	    LogErrF(EC_General, "Unknown option '%s'", *argv);
@@ -496,6 +502,7 @@ User_DeclQuants (void)
     #endif /* BEAM_FCT */
 
     DDefInt(NULL , "RL_Agent.On" , "-", &(RL_Agent.On) , DVA_IO_In);
+    DDefInt(NULL , "RL_Agent.Episodes" , "-", &(RL_Agent.Episodes) , DVA_IO_In);
     DDefDouble4(NULL , "RL_Agent.Reward" , "-", &(reward), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Reward_Factor" , "-", &(reward_factor), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Steer" , "-", &(RL_Agent.steer), DVA_None);
@@ -643,8 +650,6 @@ User_TestRun_Start_atBegin (void)
 }
 
 
-
-
 /*
 ** User_TestRun_Start_atEnd ()
 **
@@ -665,6 +670,26 @@ User_TestRun_Start_atBegin (void)
 int
 User_TestRun_Start_atEnd (void)
 {
+    /* Connect to server */
+    RL_Agent.nrt_pair =  malloc(sizeof(RL_Agent.nrt_pair));
+    if((RL_Agent.nrt_pair) == NULL)
+    {
+        printf("FAIL TO ALLOCATE MEMORY\n");
+    }
+    RL_Agent.nrt_pair = zsock_new_pair(ipc_adress_nrt);
+    zsock_set_rcvtimeo(RL_Agent.nrt_pair, 0);
+
+    /* Connect to server */
+    RL_Agent.rt_pair =  malloc(sizeof(RL_Agent.rt_pair));
+    if((RL_Agent.rt_pair) == NULL)
+    {
+        printf("FAIL TO ALLOCATE MEMORY\n");
+    }
+    RL_Agent.rt_pair = zsock_new_pair(ipc_adress);
+    zsock_set_rcvtimeo(RL_Agent.rt_pair, 250);
+
+    /* Other */
+
     CheckPath_at_s = RoadNewRoadEval (Env.Road, ROAD_BUMP_ALL, ROAD_OT_EXT, NULL);
     RoadEvalSetRouteByObjId (CheckPath_at_s, Env.Route.ObjId, 1);
 
@@ -861,6 +886,9 @@ User_TestRun_End (void)
 
     Reset_sRoad_Distance ();
 
+    zsock_destroy(&(RL_Agent.nrt_pair));
+    zsock_destroy(&(RL_Agent.rt_pair));
+
     return 0;
 }
 
@@ -908,6 +936,15 @@ User_In (const unsigned CycleNo)
             VEC_SubS(repos->New.Pos,repos->New.PosOffset);
         }
     #endif /* BEAM_FCT */
+
+    if(counter % 500 == 0) {
+        char *buf = zstr_recv(RL_Agent.nrt_pair);
+        if (buf != NULL) {
+            RL_Agent.Episodes = atoi(buf);
+            zstr_free(&buf);
+        }
+        zstr_free(&buf);
+    }
 }
 
 
@@ -960,9 +997,6 @@ Send_State (int action)
         default: State = SimCore.Time; break;
     }
 
-    /* Connect to server */
-    zsock_t *requester = zsock_new_pair(ipc_adress);
-
     double LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
                             Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
 
@@ -1009,20 +1043,17 @@ Send_State (int action)
 
     /* Send messsage to server */
     //printf("Sending: ");
-    zstr_send(requester, out_msg);
+    zstr_send(RL_Agent.rt_pair, out_msg);
     //printf("%s\n", out_msg);
 
     /* Recieve messsage from server */
-    
-    zsock_set_rcvtimeo(requester, 250);
     //printf("Incoming Message: ");
-    char *buf = zstr_recv(requester);
+    char *buf = zstr_recv(RL_Agent.rt_pair);
 
     if (buf == NULL) {
         // printf("No msg\n");
         zstr_free(&buf);
         // printf("Free\n");
-        zsock_destroy(&requester);
         // printf("Destroyed\n");
         char *buf1 = "0 0";
         // printf("buf1 created\n");
@@ -1030,8 +1061,9 @@ Send_State (int action)
     }
     else {
         // printf("%s\n", buf);
-        zsock_destroy(&requester);
-        return buf;
+        char *obs_spec = buf;
+        zstr_free(&buf);
+        return obs_spec;
     }
 
 
@@ -1121,7 +1153,7 @@ User_VehicleControl_Calc (double dt)
                 tRoadRouteIn CheckST;
                 CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
                 CheckST.st[1] = 0;
-                CheckST.st[0] = 5;
+                //CheckST.st[0] = 5;
 
                 //printf("S: %f\n", CheckST.st[0]);
 
@@ -1193,7 +1225,7 @@ User_VehicleControl_Calc (double dt)
             tRoadRouteIn CheckST;
             CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
             CheckST.st[1] = 0;
-            CheckST.st[0] = 5;
+            //CheckST.st[0] = 5;
             //printf("S: %f\n", CheckST.st[0]);
 
             tRoadRouteOutExt Out_CheckST;

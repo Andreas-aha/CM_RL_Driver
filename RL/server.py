@@ -6,21 +6,27 @@ class Server:
 
     def __init__(self, tcp_port=14100):
 
+        # Connection to CM Simulation in rt
         self.tcp_port = tcp_port
         z_context = "ipc:///tmp/%d" % tcp_port
-
-        
-
-        # Connect to CM Simulation
         context = zmq.Context()
         self.zsocket = context.socket(zmq.PAIR)
         self.zsocket.bind(z_context)
 
         self.not_recieved_attempts = 0
-
         self.zsocket.setsockopt( zmq.LINGER,      0 )  # ____POLICY: set upon instantiations
         self.zsocket.setsockopt( zmq.AFFINITY,    1 )  # ____POLICY: map upon IO-type thread
         self.zsocket.setsockopt( zmq.RCVTIMEO,  125 )
+
+        # Connection to CM Simulation non rt/block
+        self.tcp_port_nrt = tcp_port + 100
+        z_context_nrt = "ipc:///tmp/%d" % self.tcp_port_nrt
+        context_nrt = zmq.Context()
+        self.zsocket_nrt = context_nrt.socket(zmq.PAIR)
+        self.zsocket_nrt.bind(z_context_nrt)
+
+    def server_nrt(self,msg):
+        self.zsocket_nrt.send_string(msg)
 
     def server_step(self, action = [0,0]):
 
