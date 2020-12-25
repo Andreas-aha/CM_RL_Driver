@@ -1,6 +1,6 @@
 #INFOFILE1.1 - Do not remove this line!
 FileIdent = CarMaker-Car 9
-FileCreator = CarMaker 2020-12-14 00:24:49
+FileCreator = CarMaker 2020-12-25 15:36:18
 
 
 ## Assembly ##############################################################
@@ -319,9 +319,15 @@ Susp.Comment:
 
 
 ## Steering ##############################################################
-Steering.Kind = GenAngle 1
+Steering.Kind = GenTorque 1
 Steering.Comment:
 Steering.Rack2StWhl = 94.853
+Steering.Wheel.I = 0.001
+Steering.Wheel.d = 1.0
+Steering.Rack.mass = 10.0
+Steering.Rack.d = 50.0
+Steering.Rack.travel = 0.08
+Steering.Amplify = 3.0
 
 
 ## Tires #################################################################
@@ -484,7 +490,7 @@ Sensor.Object.ObservRadius = 500.0
 Sensor.FSpace.N = 0
 Sensor.TSign.N = 0
 Sensor.Line.N = 0
-Sensor.Road.N = 10
+Sensor.Road.N = 11
 Sensor.Road.0.name = RD001
 Sensor.Road.0.PreviewDist = 20
 Sensor.Road.0.PreviewMode = AlongRoute
@@ -535,6 +541,11 @@ Sensor.Road.9.PreviewDist = 20
 Sensor.Road.9.PreviewMode = AlongRoute
 Sensor.Road.9.ConsiderBumps = 0
 Sensor.Road.9.pos = 3.517 0.0 0.313
+Sensor.Road.10.name = RD011
+Sensor.Road.10.PreviewDist = 20
+Sensor.Road.10.PreviewMode = AlongRoute
+Sensor.Road.10.ConsiderBumps = 0
+Sensor.Road.10.pos = 3.517 0.0 0.313
 Sensor.Collision.Active = 0
 Sensor.GNav.pos = 0.0 0.0 0.0
 Sensor.GNav.Mounting = Fr1A
@@ -618,5 +629,6 @@ Crypto.AllowAccess:
 
 
 ## Additional ############################################################
+A = 0
 
 Additional.Comment:

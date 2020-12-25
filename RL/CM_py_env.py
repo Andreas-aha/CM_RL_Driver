@@ -24,7 +24,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
     if mode is 'evaluate':
       self.max_EpSteps = 6000
     else:
-      self.max_EpSteps = 800
+      self.max_EpSteps = 1200
 
     self.gamma = gamma
     self.RTFac = RTFac
@@ -77,7 +77,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
   def action_spec(self):
     return array_spec.BoundedArraySpec(
       shape=(2,), dtype=np.float32, 
-      minimum=[-1, -3.14], maximum=[1., 3.14], 
+      minimum=[-1, -4.999], maximum=[1, 4.999], 
       name='action')
 
   def observation_spec(self):
@@ -115,12 +115,11 @@ class CarMakerEnv(py_environment.PyEnvironment):
       while Server(self.tcp_port).send_gui("SimStatus") != "0":
         Server(self.tcp_port).server_step()
 
-      Server(self.tcp_port).server_step([5.,5.])
-    else:
       # Action [5.,5.] signals CM, that Episode ended.
       Server(self.tcp_port).server_step([5.,5.])
 
-    for i in range(3):
+    for _ in range(3):
+      # Todo: check static
       Server(self.tcp_port).server_step()
 
     self._state, self.sim_time, self.s_road = Server(self.tcp_port).server_step()
@@ -144,7 +143,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
       self._episode_ended = True
     else:
       self._state, self.sim_time, self.s_road = Server(self.tcp_port).server_step(action)
-      reward = (self.s_road - self.s_road_old)*10 / (1 + abs(self._state[6])*4.)
+      reward = (self.s_road - self.s_road_old)*10 / (1 + abs(self._state[1])*4.)
       if self._state[0] < 0.1:
         reward = -1
       self.s_road_old = self.s_road

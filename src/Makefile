@@ -25,7 +25,7 @@ LD_LIBS =		$(CAR_LIB) \
 OBJS =			CM_Main.o CM_Vehicle.o User.o
 
 # Prepend local include/library directory to include path:
-# PREINC_CFLAGS +=		-I../include -I../lib/$(ARCH) -I../lib
+PREINC_CFLAGS +=		-I../include -I../lib/$(ARCH) -I../lib
 
 # Append local include/library directory to include path:
 # INC_CFLAGS +=		-I../include -I../lib/$(ARCH) -I../lib

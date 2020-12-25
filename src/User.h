@@ -15,6 +15,7 @@
 
 #include <Global.h>
 #include <Vehicle/MBSUtils.h>
+#include <cJSON.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +27,14 @@ extern int UserCalcCalledByAppTestRunCalc;
 
 
 #define N_USEROUTPUT	10
+
+cJSON *uaq_json;
+
+void ReposVhcl (void);
+
+void ddict2json (void);
+void get_rlddict_selection (void);
+void Add2Json_Object (void);
 
 void RoadBorderDist (tRoadEval*, tRoadEval*, double *, double);
 void Calc_sRoad_Distance (void);

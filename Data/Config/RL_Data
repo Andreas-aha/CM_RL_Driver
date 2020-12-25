@@ -43,7 +43,11 @@ DStore.Quantities.normal:
 	DM.GearNo
 	DM.Shifting
 	DM.Steer.Ang
+	DM.Steer.AngAcc
+	DM.Steer.AngVel
+	DM.Steer.Trq
 	PT.Engine.rotv
+	RL_Agent.Episodes
 	RL_Agent.Gas
 	RL_Agent.On
 	RL_Agent.Reward
@@ -71,6 +75,8 @@ DStore.Quantities.normal:
 	Sensor.Road.RD009.Route.CurveXY
 	Sensor.Road.RD010.PreviewDist
 	Sensor.Road.RD010.Route.CurveXY
+	Sensor.Road.RD011.PreviewDist
+	Sensor.Road.RD011.Route.CurveXY
 	Time
 	UserTest.Road.DrivenDistance
 	UserTest.Road.LapLength
@@ -93,4 +99,5 @@ DStore.Quantities.normal:
 	Vhcl.tRoad
 	Vhcl.v
 	Vhcl.Yaw
+	Vhcl.YawRate
 DStore.Quantities.slow:

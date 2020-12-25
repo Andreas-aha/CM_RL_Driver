@@ -97,6 +97,9 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include <cJSON.h>
+#include <cJSON2.h>
+
 #include <Vehicle/Sensor_Line.h>
 #include <Vehicle/Sensor_Inertial.h>
 
@@ -117,15 +120,13 @@ struct tRL_Agent {
     double gas;
     double steer;
     int Episodes;
-    zsock_t *rt_pair;
-    zsock_t *nrt_pair;
+    char **uaq_txt;
 };
 struct tRL_Agent RL_Agent = {
     .On = true
 };
 
-char ipc_adress[] = "ipc:///tmp/99999999999";
-char ipc_adress_nrt[] = "ipc:///tmp/99999999999";
+char ipc_adress[] = "ipc:///tmp/99999";
 
 double LS_F;
 
@@ -211,7 +212,7 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 	    return;
 	}
 
-	Log ("Step0@CycleNo %d: Saving freeze position\n", SimCore.CycleNo);
+	//Log ("Step0@CycleNo %d: Saving freeze position\n", SimCore.CycleNo);
 	// VEC_Assign(rstps->Freeze.Pos,Car.ConBdy1.t_0);
 	VEC_Assign(rstps->Freeze.Pos,Car.Fr1.t_0);
 	rstps->Freeze.Ang[0] = Car.Roll;
@@ -225,14 +226,14 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 	if (SimCore.State < SCState_StartLastCycle)
 	    return;
 
-	if (FreezeOnce == 0)
-	    Log ("Setting speeds to zero\n");
+	//if (FreezeOnce == 0)
+	    //Log ("Setting speeds to zero\n");
 	/* -> velocities */
 	VEC_Assign(IF->v_0,Null3x1);
 	VEC_Assign(IF->rv_zyx,Null3x1);
 	
-	if (FreezeOnce == 0) {
-	    Log ("Step1@CycleNo %d: Freezing at pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
+	/*if (FreezeOnce == 0) {
+	    //Log ("Step1@CycleNo %d: Freezing at pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
 		SimCore.CycleNo,
 		rstps->Freeze.Pos[0], 
 		rstps->Freeze.Pos[1],
@@ -240,14 +241,14 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 		rstps->Freeze.Ang[0]*rad2deg,
 		rstps->Freeze.Ang[1]*rad2deg,
 		rstps->Freeze.Ang[2]*rad2deg);
-	    Log ("Desire to move to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
+	    //Log ("Desire to move to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
 		rstps->New.Pos[0],
 		rstps->New.Pos[1],
 		rstps->New.Pos[2],
 		rstps->New.Ang[0]*rad2deg,
 		rstps->New.Ang[1]*rad2deg,
 		rstps->New.Ang[2]*rad2deg);
-	}
+	}*/
 	
 	/* -> positions */
 	VEC_Assign(IF->t_0,rstps->Freeze.Pos);
@@ -262,17 +263,18 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 	if (SimCore.State < SCState_StartLastCycle)
 	    return;
 	
-	Log ("Starting new simulation in UserPgm\n");
+	Log ("Starting Episode %d at %.2fs.\n", RL_Agent.Episodes+1, SimCore.Time);
+    ovrwrt_drvr = false;
 
 	/* -> velocities */
     double speed_0[3];
-    double speed_fac = (double)rand()/(double)(RAND_MAX/30);
-	Log ("Setting speed to %.2f m/s\n", speed_fac);
+    //double speed_fac = (double)rand()/(double)(RAND_MAX/30);
+	//Log ("Setting speed to %.2f m/s\n", speed_fac);
     VEC_Mul(speed_0, EX3x1, 0);
 	VEC_Assign(IF->v_0,speed_0);
 	VEC_Assign(IF->rv_zyx,Null3x1);
 
-	Log ("Step2@CycleNo %d: Switching to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
+	/*Log ("Step2@CycleNo %d: Switching to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
 	    SimCore.CycleNo,
 	    rstps->New.Pos[0],
 	    rstps->New.Pos[1],
@@ -280,6 +282,7 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 	    rstps->New.Ang[0]*rad2deg,
 	    rstps->New.Ang[1]*rad2deg,
 	    rstps->New.Ang[2]*rad2deg);
+    */
 	/* -> positions */
 	VEC_Assign(IF->t_0,rstps->New.Pos);
 	VEC_Assign(IF->r_zyx,rstps->New.Ang);
@@ -401,11 +404,9 @@ User_ScanCmdLine (int argc, char **argv)
 	    return  NULL;
     } else if ( strcmp(*argv, "-servern") == 0 ) {
 	    int server_n = atoi(*++argv);
-        int server_n_nrt = server_n + 100;
         Log("Server: %d\n", server_n);
         sprintf(ipc_adress, "ipc:///tmp/%d", server_n);
-        sprintf(ipc_adress_nrt, "ipc:///tmp/%d", server_n_nrt);
-        Log("RT: %s NonRT: %s\n", ipc_adress, ipc_adress_nrt);
+        Log("%s\n", ipc_adress);
 	    return  NULL;
 	} else if ((*argv)[0] == '-') {
 	    LogErrF(EC_General, "Unknown option '%s'", *argv);
@@ -650,6 +651,8 @@ User_TestRun_Start_atBegin (void)
 }
 
 
+
+
 /*
 ** User_TestRun_Start_atEnd ()
 **
@@ -670,26 +673,6 @@ User_TestRun_Start_atBegin (void)
 int
 User_TestRun_Start_atEnd (void)
 {
-    /* Connect to server */
-    RL_Agent.nrt_pair =  malloc(sizeof(RL_Agent.nrt_pair));
-    if((RL_Agent.nrt_pair) == NULL)
-    {
-        printf("FAIL TO ALLOCATE MEMORY\n");
-    }
-    RL_Agent.nrt_pair = zsock_new_pair(ipc_adress_nrt);
-    zsock_set_rcvtimeo(RL_Agent.nrt_pair, 0);
-
-    /* Connect to server */
-    RL_Agent.rt_pair =  malloc(sizeof(RL_Agent.rt_pair));
-    if((RL_Agent.rt_pair) == NULL)
-    {
-        printf("FAIL TO ALLOCATE MEMORY\n");
-    }
-    RL_Agent.rt_pair = zsock_new_pair(ipc_adress);
-    zsock_set_rcvtimeo(RL_Agent.rt_pair, 250);
-
-    /* Other */
-
     CheckPath_at_s = RoadNewRoadEval (Env.Road, ROAD_BUMP_ALL, ROAD_OT_EXT, NULL);
     RoadEvalSetRouteByObjId (CheckPath_at_s, Env.Route.ObjId, 1);
 
@@ -758,6 +741,9 @@ User_TestRun_Start_atEnd (void)
         }
         }
     #endif /* BEAM_FCT */
+
+    get_rlddict_selection ();
+    uaq_json = cJSON_CreateArray();
 
     return 0;
 }
@@ -845,10 +831,75 @@ User_TestRun_End_First (void)
         repos->Order.now = 0;
         repos->Order.old = 0;
     #endif
-        
+
+    ddict2json ();
+    cJSON_Delete(uaq_json);
+    free(RL_Agent.uaq_txt);
     return 0;
 }
 
+void
+ddict2json (void)
+{
+    char fn[255];
+    int ep = RL_Agent.Episodes + 1;
+    char *string = cJSON_Print(uaq_json);
+    if (string == NULL)
+    {
+        LogErrStr(EC_General, "Failed to print monitor.\n");
+    }
+    FILE * fPtr;
+    sprintf(fn, "SimOutput/rl_uaq_store/ep_%d.json", ep);
+    fPtr = fopen(fn, "w");
+    if(fPtr == NULL)
+    {
+        /* File not created hence exit */
+        LogErrStr(EC_General, "Unable to create log-file.\n");
+    }
+    fputs(string, fPtr);
+    cJSON_free(string);
+    fclose(fPtr);
+    cJSON_Delete(uaq_json);
+    uaq_json = cJSON_CreateArray();
+}
+
+void
+get_rlddict_selection (void)
+{
+    tInfos *rl = InfoNew();
+    tErrorMsg *err;
+
+    int w = InfoRead(&err, rl, "Data/Config/RL_Data");
+    if (w < 0) 
+        LogWarnStr(EC_General, "Could not read info file for rl output quants.\n");
+
+    char **uaq_txt = iGetTxt(rl, "DStore.Quantities.normal");
+    int i = 0;
+    while (uaq_txt[i] != NULL)
+        i++;
+    RL_Agent.uaq_txt = malloc(i * sizeof * RL_Agent.uaq_txt);
+    Log("\n\nRL Data UAQs:\n");
+    int j;
+    for(j = 0; j < i; j++)
+    {
+        RL_Agent.uaq_txt[j] = strdup(uaq_txt[j]);
+        Log("   %s\n",RL_Agent.uaq_txt[j]);
+    }
+    RL_Agent.uaq_txt[i] = NULL;
+}
+
+void
+Add2Json_Object (void)
+{
+    cJSON *cycle = cJSON_CreateObject();
+    for (int i = 0; RL_Agent.uaq_txt[i] != NULL; i++)
+    {
+        tDDictEntry *dentry = DDictGetEntry(RL_Agent.uaq_txt[i]);
+        double val = dentry->GetFunc(dentry->Var);
+        cJSON_AddNumberToObject(cycle, RL_Agent.uaq_txt[i], val);
+    }
+    cJSON_AddItemToArray(uaq_json, cycle);
+}
 
 
 /*
@@ -885,9 +936,6 @@ User_TestRun_End (void)
     RoadDeleteRoadEval(OnRoadSens_RE_R30_2);
 
     Reset_sRoad_Distance ();
-
-    zsock_destroy(&(RL_Agent.nrt_pair));
-    zsock_destroy(&(RL_Agent.rt_pair));
 
     return 0;
 }
@@ -936,15 +984,6 @@ User_In (const unsigned CycleNo)
             VEC_SubS(repos->New.Pos,repos->New.PosOffset);
         }
     #endif /* BEAM_FCT */
-
-    if(counter % 500 == 0) {
-        char *buf = zstr_recv(RL_Agent.nrt_pair);
-        if (buf != NULL) {
-            RL_Agent.Episodes = atoi(buf);
-            zstr_free(&buf);
-        }
-        zstr_free(&buf);
-    }
 }
 
 
@@ -969,6 +1008,37 @@ User_DrivMan_Calc (double dt)
     return 0;
 }
 
+void
+ReposVhcl (void)
+{
+    int w;
+    w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 2, NULL);
+    if (w<0)
+        Log("No DVA write to VC.Lights.IndL possible\n");
+
+    // Reset pos via DVA to Start Pos:
+    tRoadRouteIn CheckST;
+    CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
+    CheckST.st[1] = 0;
+    CheckST.st[0] = 5;
+
+    tRoadRouteOutExt Out_CheckST;
+    w = RoadRouteEvalExt (CheckPath_at_s, NULL, RIT_ST, &CheckST, &Out_CheckST);
+    if (w<0)
+        Log("RoadRouteEval Error #%d\n",w);
+
+    double rx, ry, rz;
+    NEV2FreiZYX (&Out_CheckST.suv[0], &Out_CheckST.suv[1], &Out_CheckST.suv[2], &rx,&ry, &rz);
+
+    tResetPos *rstps = &User.ResetPos;
+    rstps->New.Pos[0] = Out_CheckST.xyz[0];
+    rstps->New.Pos[1] = Out_CheckST.xyz[1];
+    rstps->New.Pos[2] = Out_CheckST.xyz[2];
+    rstps->New.Ang[0] = Out_CheckST.nuv[0];
+    rstps->New.Ang[1] = Out_CheckST.nuv[1];
+    rstps->New.Ang[2] = rz;
+    rstps->Order.DVA = 1;
+}
 
 /*
 ** Send_State (int action)
@@ -985,17 +1055,24 @@ const char*
 Send_State (int action)
 {
     float State;
-    char out_msg[1024] = {'\0'};
+    char out_msg[4095] = {'\0'};
     char *loc = out_msg;
-    size_t out_msg_BufferSpace = 1024;
+    size_t out_msg_BufferSpace = 4096;
     size_t tempLen;
 
     switch(action) {
         case 0: State = SimCore.Time; break;
-        case 1: State = 4.04; break;
+        case 1: 
+            State = 4.04; 
+            ddict2json ();
+            ReposVhcl ();
+            break;
         case 2: State = 3.03; break;
         default: State = SimCore.Time; break;
     }
+
+    /* Connect to server */
+    zsock_t *requester = zsock_new_pair(ipc_adress);
 
     double LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
                             Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
@@ -1005,12 +1082,15 @@ Send_State (int action)
                             State,
                             sRoad_Distance,
                             Vehicle.v/6,
-                            InertialSensor[0].Acc_0[0] ,
-                            InertialSensor[0].Acc_0[1] ,
-                            Steering.IF.Ang,
-                            0.,
-                            LongSlip,
                             Car.ConBdy1.SideSlipAngle,
+                            InertialSensor[0].Acc_0[0],
+                            InertialSensor[0].Acc_0[1],
+                            Car.YawRate,
+                            Steering.IF.Ang,
+                            Steering.IF.AngVel,
+                            Steering.IF.AngAcc/500,
+                            Steering.IF.TrqStatic,
+                            LongSlip,
                             Car.FARoadSensor.Route.Deviation.Ang,
                             LSMarkerPos_Add_00 / 6,
                             LSMarkerPos_Add_L90 / 6,
@@ -1022,16 +1102,15 @@ Send_State (int action)
                             RoadSensor[0].Route.CurveXY * 40,
                             //RoadSensor[1].Route.CurveXY * 40,
                             //RoadSensor[2].Route.CurveXY * 40,
-                            //RoadSensor[3].Route.CurveXY * 40,
-                            RoadSensor[4].Route.CurveXY * 40,
+                            RoadSensor[3].Route.CurveXY * 40,
+                            //RoadSensor[4].Route.CurveXY * 40,
                             //RoadSensor[5].Route.CurveXY * 40,
-                            //RoadSensor[6].Route.CurveXY * 40,
+                            RoadSensor[6].Route.CurveXY * 40,
                             //RoadSensor[7].Route.CurveXY * 40,
-                            RoadSensor[8].Route.CurveXY * 40,
-                            //RoadSensor[9].Route.CurveXY * 40
+                            //RoadSensor[8].Route.CurveXY * 40,
+                            RoadSensor[9].Route.CurveXY * 40,
+                            RoadSensor[10].Route.CurveXY * 40
     };
-
-
 
     int i;
     for(i = 0; i < DIM(state_array); ++i)
@@ -1043,17 +1122,20 @@ Send_State (int action)
 
     /* Send messsage to server */
     //printf("Sending: ");
-    zstr_send(RL_Agent.rt_pair, out_msg);
+    zstr_send(requester, out_msg);
     //printf("%s\n", out_msg);
 
     /* Recieve messsage from server */
+    
+    zsock_set_rcvtimeo(requester, 250);
     //printf("Incoming Message: ");
-    char *buf = zstr_recv(RL_Agent.rt_pair);
+    char *buf = zstr_recv(requester);
 
     if (buf == NULL) {
         // printf("No msg\n");
         zstr_free(&buf);
         // printf("Free\n");
+        zsock_destroy(&requester);
         // printf("Destroyed\n");
         char *buf1 = "0 0";
         // printf("buf1 created\n");
@@ -1061,13 +1143,9 @@ Send_State (int action)
     }
     else {
         // printf("%s\n", buf);
-        char *obs_spec = buf;
-        zstr_free(&buf);
-        return obs_spec;
-    }
-
-
-    
+        zsock_destroy(&requester);
+        return buf;
+    }    
 }
 
 /*
@@ -1091,8 +1169,9 @@ Update_RoadSensorPrevDist ()
     RoadSensor[5].PreviewDist = 1 + Vehicle.v * 2.0;
     RoadSensor[6].PreviewDist = 1 + Vehicle.v * 2.2;
     RoadSensor[7].PreviewDist = 1 + Vehicle.v * 2.4;
-    RoadSensor[9].PreviewDist = 1 + Vehicle.v * 2.8;
     RoadSensor[8].PreviewDist = 1 + Vehicle.v * 2.6;
+    RoadSensor[9].PreviewDist = 1 + Vehicle.v * 2.8;
+    RoadSensor[10].PreviewDist = 1 + Vehicle.v * 3.4;
 }
 
 int
@@ -1143,39 +1222,6 @@ User_VehicleControl_Calc (double dt)
 
                 ovrwrt_drvr = false;
                 Send_State(1);
-
-                w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 2, NULL);
-                if (w<0)
-                    Log("No DVA write to VC.Lights.IndL possible\n");
-
-                // Reset pos via DVA to Start Pos:
-
-                tRoadRouteIn CheckST;
-                CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
-                CheckST.st[1] = 0;
-                //CheckST.st[0] = 5;
-
-                //printf("S: %f\n", CheckST.st[0]);
-
-                tRoadRouteOutExt Out_CheckST;
-                w = RoadRouteEvalExt (CheckPath_at_s, NULL, RIT_ST, &CheckST, &Out_CheckST);
-                if (w<0)
-                    Log("RoadRouteEval Error #%d\n",w);
-
-                double rx, ry, rz;
-                NEV2FreiZYX (&Out_CheckST.suv[0], &Out_CheckST.suv[1], &Out_CheckST.suv[2], &rx,&ry, &rz);
-
-                //printf("X: %f, Y: %f, RX: %f, RY: %f, RZ: %f\n", Out_CheckST.xyz[0], Out_CheckST.xyz[1], rx, ry, rz);
-
-                tResetPos *rstps = &User.ResetPos;
-                rstps->New.Pos[0] = Out_CheckST.xyz[0];
-                rstps->New.Pos[1] = Out_CheckST.xyz[1];
-                rstps->New.Pos[2] = Out_CheckST.xyz[2];
-                rstps->New.Ang[0] = Out_CheckST.nuv[0];
-                rstps->New.Ang[1] = Out_CheckST.nuv[1];
-                rstps->New.Ang[2] = rz;
-                rstps->Order.DVA = 1;
-
             }
         }
         else if (!ovrwrt_drvr) {
@@ -1184,7 +1230,6 @@ User_VehicleControl_Calc (double dt)
                     Log("No DVA write to User.ResetPos.Order.DVA possible\n");
 
             ovrwrt_drvr = true;
-            counter = 1;
             Reset_sRoad_Distance();
             return 0;
         }
@@ -1207,7 +1252,7 @@ User_VehicleControl_Calc (double dt)
         char* pEnd;
         user_gas = strtod (Send_State(0), &pEnd);
         user_steer_acc_roh = strtod (pEnd, &pEnd);
-        user_steer_acc = user_steer_acc_roh/1000;
+        user_steer_acc = user_steer_acc_roh;
 
         RL_Agent.gas = user_gas;
         RL_Agent.steer = user_steer_acc_roh;
@@ -1215,37 +1260,6 @@ User_VehicleControl_Calc (double dt)
         if (user_gas > 4 && user_steer_acc_roh > 4) {
             ovrwrt_drvr = false;
             Send_State(1);
-
-            w = DVA_WriteRequest("VC.Lights.IndL", OWMode_Abs, 5000, 0, 0, 2, NULL);
-            if (w<0)
-                Log("No DVA write to VC.Lights.IndL possible\n");
-
-            // Reset pos via DVA to Start Pos:
-
-            tRoadRouteIn CheckST;
-            CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
-            CheckST.st[1] = 0;
-            //CheckST.st[0] = 5;
-            //printf("S: %f\n", CheckST.st[0]);
-
-            tRoadRouteOutExt Out_CheckST;
-            w = RoadRouteEvalExt (CheckPath_at_s, NULL, RIT_ST, &CheckST, &Out_CheckST);
-            if (w<0)
-                Log("RoadRouteEval Error #%d\n",w);
-
-            double rx, ry, rz;
-            NEV2FreiZYX (&Out_CheckST.suv[0], &Out_CheckST.suv[1], &Out_CheckST.suv[2], &rx,&ry, &rz);
-
-            //printf("X: %f, Y: %f, RX: %f, RY: %f, RZ: %f\n", Out_CheckST.xyz[0], Out_CheckST.xyz[1], rx, ry, rz);
-
-            tResetPos *rstps = &User.ResetPos;
-            rstps->New.Pos[0] = Out_CheckST.xyz[0];
-            rstps->New.Pos[1] = Out_CheckST.xyz[1];
-            rstps->New.Pos[2] = Out_CheckST.xyz[2];
-            rstps->New.Ang[0] = Out_CheckST.nuv[0];
-            rstps->New.Ang[1] = Out_CheckST.nuv[1];
-            rstps->New.Ang[2] = rz;
-            rstps->Order.DVA = 1;
             return 0;
         }
 
@@ -1272,6 +1286,7 @@ User_VehicleControl_Calc (double dt)
                 Log("No DVA write to DM.Gas possible\n");
         }
         
+        Add2Json_Object ();
     }
 
     return 0;
@@ -1343,32 +1358,13 @@ User_Calc (double dt)
 
     if (!RL_Agent.On) 
         return 0;
-
-    double steerang;
-    double steerang_vel;
-
-    // TODO: Steering.IF.AngVel ist immer null workaround
-    steerang_vel = user_steer_acc;
-    if (steerang_vel > M_PI/1000) {
-        steerang_vel = M_PI/1000;
-    }
-    else if (steerang_vel < -M_PI/1000)
-    {
-        steerang_vel = -M_PI/1000;
-    }
-    steerang = Steering.IF.Ang + steerang_vel;
-    if (steerang > 8) {
-        steerang = 8;
-    }
-    else if (steerang < -8)
-    {
-        steerang = -8;
-    }
     
     int r;
-    r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, 1, 0, 0, steerang, NULL);
+    r = DVA_WriteRequest("DM.Steer.Trq", OWMode_Abs, 1, 0, 0, RL_Agent.steer, NULL);
     if (r<0)
-        Log("No DVA write to DM.Steer possible\n");
+        Log("No DVA write to DM.Steer.Trq possible\n");
+    
+
 
     counter++;
 
