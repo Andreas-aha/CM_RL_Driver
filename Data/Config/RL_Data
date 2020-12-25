@@ -42,10 +42,6 @@ DStore.Quantities.normal:
 	DM.Gas
 	DM.GearNo
 	DM.Shifting
-	DM.Steer.Ang
-	DM.Steer.AngAcc
-	DM.Steer.AngVel
-	DM.Steer.Trq
 	PT.Engine.rotv
 	RL_Agent.Episodes
 	RL_Agent.Gas
@@ -77,6 +73,12 @@ DStore.Quantities.normal:
 	Sensor.Road.RD010.Route.CurveXY
 	Sensor.Road.RD011.PreviewDist
 	Sensor.Road.RD011.Route.CurveXY
+	Steer.SteerBy
+	Steer.WhlAcc
+	Steer.WhlAng
+	Steer.WhlTrq
+	Steer.WhlTrqStatic
+	Steer.WhlVel
 	Time
 	UserTest.Road.DrivenDistance
 	UserTest.Road.LapLength
