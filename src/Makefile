@@ -13,7 +13,7 @@
 #**
 #******************************************************************************
 
-include /opt/ipg/carmaker/linux64-9.1/include/MakeDefs.linux64
+include /opt/ipg/carmaker/linux64-9.0.2/include/MakeDefs.linux64
 
 APP_VER =		"Car_Generic RL_Driver"
 APP_NAME =		CarMaker.$(ARCH)$(EXE_EXT)
