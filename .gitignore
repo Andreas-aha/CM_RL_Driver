@@ -19,7 +19,6 @@ Update_*.txt
 src_cm4sl/
 Plugins/
 lib/
-include/
 /src/.settings/
 /src/*.o
 /src/core
