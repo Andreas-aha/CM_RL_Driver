@@ -121,9 +121,14 @@ struct tRL_Agent {
     double steer;
     int Episodes;
     char **uaq_txt;
+    double TCPU;
+    double TCPU_AVG;
+    int Signal;
+    double RTFac;
 };
 struct tRL_Agent RL_Agent = {
-    .On = true
+    .On = true,
+    .Episodes = 0
 };
 
 char ipc_adress[] = "ipc:///tmp/99999";
@@ -504,10 +509,14 @@ User_DeclQuants (void)
 
     DDefInt(NULL , "RL_Agent.On" , "-", &(RL_Agent.On) , DVA_IO_In);
     DDefInt(NULL , "RL_Agent.Episodes" , "-", &(RL_Agent.Episodes) , DVA_IO_In);
+    DDefInt(NULL , "RL_Agent.Signal" , "-", &(RL_Agent.Signal) , DVA_IO_In);
     DDefDouble4(NULL , "RL_Agent.Reward" , "-", &(reward), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Reward_Factor" , "-", &(reward_factor), DVA_None);
-    DDefDouble4(NULL , "RL_Agent.Steer" , "-", &(RL_Agent.steer), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.Steer" , "Nm", &(RL_Agent.steer), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Gas" , "-", &(RL_Agent.gas), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.TCPU" , "s", &(RL_Agent.TCPU), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.TCPU_LP1" , "s", &(RL_Agent.TCPU_AVG), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.RTFac" , "-", &(RL_Agent.RTFac), DVA_None);
 
     DDefDouble4(NULL , "UserTest.RoadBorderDist.0" , "m", &(LSMarkerPos_Add_00), DVA_None);
     DDefDouble4(NULL , "UserTest.RoadBorderDist.L90" , "m", &(LSMarkerPos_Add_L90), DVA_None);
@@ -877,7 +886,7 @@ get_rlddict_selection (void)
     int i = 0;
     while (uaq_txt[i] != NULL)
         i++;
-    RL_Agent.uaq_txt = malloc(i * sizeof * RL_Agent.uaq_txt);
+    RL_Agent.uaq_txt = malloc((i+1) * sizeof * RL_Agent.uaq_txt);
     Log("\n\nRL Data UAQs:\n");
     int j;
     for(j = 0; j < i; j++)
@@ -886,6 +895,7 @@ get_rlddict_selection (void)
         Log("   %s\n",RL_Agent.uaq_txt[j]);
     }
     RL_Agent.uaq_txt[i] = NULL;
+    Log("\nFinished reading Output Quantities from RL_Data\n");
 }
 
 void
@@ -1055,9 +1065,9 @@ const char*
 Send_State (int action)
 {
     float State;
-    char out_msg[4095] = {'\0'};
+    char out_msg[8191] = {'\0'};
     char *loc = out_msg;
-    size_t out_msg_BufferSpace = 4096;
+    size_t out_msg_BufferSpace = 8192;
     size_t tempLen;
 
     switch(action) {
@@ -1081,35 +1091,35 @@ Send_State (int action)
     double state_array[] = { 
                             State,
                             sRoad_Distance,
-                            Vehicle.v/6,
+                            Vehicle.v,
                             Car.ConBdy1.SideSlipAngle,
                             InertialSensor[0].Acc_0[0],
                             InertialSensor[0].Acc_0[1],
                             Car.YawRate,
                             Steering.IF.Ang,
                             Steering.IF.AngVel,
-                            Steering.IF.AngAcc/500,
+                            Steering.IF.AngAcc/500.,
                             Steering.IF.TrqStatic,
                             LongSlip,
                             Car.FARoadSensor.Route.Deviation.Ang,
-                            LSMarkerPos_Add_00 / 6,
-                            LSMarkerPos_Add_L90 / 6,
-                            LSMarkerPos_Add_L60 / 6,
-                            LSMarkerPos_Add_L30 / 6,
-                            LSMarkerPos_Add_R90 / 6,
-                            LSMarkerPos_Add_R60 / 6,
-                            LSMarkerPos_Add_R30 / 6,
-                            RoadSensor[0].Route.CurveXY * 40,
+                            LSMarkerPos_Add_00 / 6.,
+                            LSMarkerPos_Add_L90 / 6.,
+                            LSMarkerPos_Add_L60 / 6.,
+                            LSMarkerPos_Add_L30 / 6.,
+                            LSMarkerPos_Add_R90 / 6.,
+                            LSMarkerPos_Add_R60 / 6.,
+                            LSMarkerPos_Add_R30 / 6.,
+                            RoadSensor[0].Route.CurveXY * 40.,
                             //RoadSensor[1].Route.CurveXY * 40,
                             //RoadSensor[2].Route.CurveXY * 40,
-                            RoadSensor[3].Route.CurveXY * 40,
+                            RoadSensor[3].Route.CurveXY * 40.,
                             //RoadSensor[4].Route.CurveXY * 40,
                             //RoadSensor[5].Route.CurveXY * 40,
-                            RoadSensor[6].Route.CurveXY * 40,
+                            RoadSensor[6].Route.CurveXY * 40.,
                             //RoadSensor[7].Route.CurveXY * 40,
                             //RoadSensor[8].Route.CurveXY * 40,
-                            RoadSensor[9].Route.CurveXY * 40,
-                            RoadSensor[10].Route.CurveXY * 40
+                            RoadSensor[9].Route.CurveXY * 40.,
+                            RoadSensor[10].Route.CurveXY * 40.
     };
 
     int i;
@@ -1121,28 +1131,25 @@ Send_State (int action)
     }
 
     /* Send messsage to server */
-    //printf("Sending: ");
     zstr_send(requester, out_msg);
-    //printf("%s\n", out_msg);
-
     /* Recieve messsage from server */
-    
+    clock_t begin = clock();
     zsock_set_rcvtimeo(requester, 250);
-    //printf("Incoming Message: ");
     char *buf = zstr_recv(requester);
+    clock_t end = clock();
+    double cpu_time = (double)(end - begin) / CLOCKS_PER_SEC;
+    RL_Agent.TCPU = cpu_time;
+    RL_Agent.TCPU_AVG = FILTER_LP1(cpu_time, RL_Agent.TCPU_AVG, 0.3);
+    RL_Agent.RTFac = 1E-3/RL_Agent.TCPU_AVG - 0.3;
+    SimCore.TAccel = RL_Agent.RTFac;
 
     if (buf == NULL) {
-        // printf("No msg\n");
         zstr_free(&buf);
-        // printf("Free\n");
         zsock_destroy(&requester);
-        // printf("Destroyed\n");
         char *buf1 = "0 0";
-        // printf("buf1 created\n");
         return buf1;
     }
     else {
-        // printf("%s\n", buf);
         zsock_destroy(&requester);
         return buf;
     }    
@@ -1285,8 +1292,6 @@ User_VehicleControl_Calc (double dt)
             if (r<0)
                 Log("No DVA write to DM.Gas possible\n");
         }
-        
-        Add2Json_Object ();
     }
 
     return 0;
@@ -1354,7 +1359,13 @@ User_Calc (double dt)
         RoadBorderDist(OnRoadSens_RE_00_1, OnRoadSens_RE_00_2, &LSMarkerPos_Add_00, 0.);
     }
 
+    if (counter % 125 == 0) {
+        Add2Json_Object ();
+    }
     Calc_sRoad_Distance();
+
+    counter++;
+
 
     if (!RL_Agent.On) 
         return 0;
@@ -1364,10 +1375,6 @@ User_Calc (double dt)
     if (r<0)
         Log("No DVA write to DM.Steer.Trq possible\n");
     
-
-
-    counter++;
-
     return 0;
 }
 
