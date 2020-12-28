@@ -16,7 +16,7 @@ class Server:
         self.not_recieved_attempts = 0
         self.zsocket.setsockopt( zmq.LINGER,      0 )  # ____POLICY: set upon instantiations
         self.zsocket.setsockopt( zmq.AFFINITY,    1 )  # ____POLICY: map upon IO-type thread
-        self.zsocket.setsockopt( zmq.RCVTIMEO,  125 )
+        self.zsocket.setsockopt( zmq.RCVTIMEO,  250 )
 
         # Connection to CM Simulation non rt/block
         self.tcp_port_nrt = tcp_port + 100
@@ -33,7 +33,7 @@ class Server:
         #  Wait for next request from client
         #log.server("Waiting for request...")
 
-        while self.not_recieved_attempts < 100:
+        while self.not_recieved_attempts < 1000:
             try:
                 message = self.zsocket.recv_string()
                 #log.server("Recieved request: %s" % message)
@@ -45,7 +45,7 @@ class Server:
                 #print("No request. Retry...")
                 self.not_recieved_attempts += 1
     
-        if self.not_recieved_attempts == 100:
+        if self.not_recieved_attempts == 1000:
             message = self.old_msg_roh
         
         self.old_msg_roh = message
@@ -90,7 +90,7 @@ class Server:
 
         MESSAGE = "eval { %s }\n" % msg
         self.s.send(MESSAGE.encode())
-        ans = self.s.recv(1024).decode().split('\r')[0]
+        ans = self.s.recv(8192).decode().split('\r')[0]
         self.s.close()
 
         return "%s" % ans[1:]
