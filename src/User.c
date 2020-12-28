@@ -1139,8 +1139,8 @@ Send_State (int action)
     clock_t end = clock();
     double cpu_time = (double)(end - begin) / CLOCKS_PER_SEC;
     RL_Agent.TCPU = cpu_time;
-    RL_Agent.TCPU_AVG = FILTER_LP1(cpu_time, RL_Agent.TCPU_AVG, 0.3);
-    RL_Agent.RTFac = 1E-3/RL_Agent.TCPU_AVG - 0.3;
+    RL_Agent.TCPU_AVG = FILTER_LP1(cpu_time, RL_Agent.TCPU_AVG, 0.1);
+    RL_Agent.RTFac = 1E-3/RL_Agent.TCPU_AVG - 0.4;
     SimCore.TAccel = RL_Agent.RTFac;
 
     if (buf == NULL) {
