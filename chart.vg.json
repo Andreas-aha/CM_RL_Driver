@@ -24,8 +24,7 @@
     },
     {
       "name": "RLVhclData",
-      "url": "SimOutput/rl_uaq_store_old/ep_2300.json",
-      
+      "url": "SimOutput/rl_uaq_store/ep_903396.json",
       "transform": [
         {
           "type": "window",
@@ -35,12 +34,16 @@
         {
           "type": "filter", 
           "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad']-7712 <= Info"
         }
       ]
     },
     {
       "name": "IPGVhclData",
-      "url": "SimOutput/rl_uaq_store_old/ep_1770.json",
+      "url": "doc/Data/RaceDriver.json",
       "transform": [
         {
           "type": "window",
@@ -50,6 +53,10 @@
         {
           "type": "filter", 
           "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
         }
       ]
     }
@@ -71,7 +78,8 @@
     {
       "name": "color",
       "type": "linear",
-      "range": {"scheme": "Viridis"},
+      "range": {"scheme": "Turbo"},
+      "reverse": true,
       "domain": {"data": "IPGVhclData", "field": "Vhcl\\.v"}
     }
   ],
@@ -106,6 +114,22 @@
 
   "marks": [
     {
+      "type": "text",
+      "interactive": false,
+      "encode": {
+        "enter": {
+          "x": {"signal": "width", "offset": -5},
+          "y": {"value": 0},
+          "fill": {"value": "black"},
+          "fontSize": {"value": 20},
+          "align": {"value": "right"}
+        },
+        "update": {
+          "text": {"signal": "Info"}
+        }
+      }
+    },
+    {
       "name": "road_left_side",
       "type": "line",
       "interpolate": "basis",
@@ -127,11 +151,29 @@
       "from": {"data": "RoadData"},
       "clip": true,
       "encode": {
+        "enter":{
+          "stroke": {"value": "grey"}
+        },
         "update": {
           "x": {"scale": "xscale", "field": "Road_r_x"},
           "y": {"scale": "yscale", "field": "Road_r_y"},
-          "stroke": {"value": "grey"},
           "strokeWidth":{"signal": "linesize"}
+        }
+       
+      }
+    },
+    {
+      "name": "road_center",
+      "type": "symbol",
+      "from": {"data": "RoadData"},
+      "clip": true,
+      "zindex": 1,
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Road_c_x"},
+          "y": {"scale": "yscale", "field": "Road_c_y"},
+          "size":{"signal": "size*10"},
+          "fill": {"value": "transparent"}
         }
        
       }
@@ -144,7 +186,6 @@
       "from": {"data": "RLVhclData"},
       "encode": {
         "update": {
-          "tooltip": {"field": "Vhcl\\.v"},
           "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
           "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
           "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
@@ -164,11 +205,11 @@
       "encode": {
         "update": {
           "x": {
-            "signal": "datum['Vhcl\\.PoI\\.x'] - datum['DM\\.Steer\\.Ang']* 20 * sin(datum['Vhcl\\.Yaw'])",
+            "signal": "datum['Vhcl\\.PoI\\.x'] - datum['Steer\\.WhlAng']* 20 * sin(datum['Vhcl\\.Yaw'])",
             "scale": "xscale"
           },
           "y": {
-            "signal": "datum['Vhcl\\.PoI\\.y'] + datum['DM\\.Steer\\.Ang']* 20 * cos(datum['Vhcl\\.Yaw'])",
+            "signal": "datum['Vhcl\\.PoI\\.y'] + datum['Steer\\.WhlAng']* 20 * cos(datum['Vhcl\\.Yaw'])",
             "scale": "yscale"
           },
           "strokeWidth":{"signal": "linesize"},
@@ -184,7 +225,6 @@
       "from": {"data": "IPGVhclData"},
       "encode": {
         "update": {
-          "tooltip": {"field": "Vhcl\\.v"},
           "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
           "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
           "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
@@ -405,7 +445,13 @@
     },
     {
       "name": "timeslider",
-      "init": "100",
+      "init": "180",
+      "on":[
+        {
+        "events": {"signal": "timer"},
+        "update": "timeslider + play_speed/10"
+        }
+      ],
       "bind":{
         "input": "range",
         "name": "Cars at Time:",
@@ -416,8 +462,8 @@
     },
     {
       "name": "timer",
-      "value": 0,
-      "on": [{"events": {"type": "timer", "throttle": 100}, "update": "timer + play_speed/10"}]
+      "init": "0",
+      "on": [{"events": {"type": "timer", "throttle": 100}, "update": "timer + play_speed/10*play"}]
     },
     {
       "name": "play_speed",
@@ -429,6 +475,27 @@
         "max": 3,
         "step": 0.1
       }
+    },
+    {
+      "name": "play",
+      "init": "0",
+      "bind":{
+        "input": "checkbox",
+        "name": "Play"
+      }
+    },
+    {
+      "name": "hover_info",
+      "value": null,
+      "on": [
+        {"events": "@road_center:mouseover", "update": "datum"},
+        {"events": "@road_center:mouseout", "update": "null"}
+      ]
+    },
+    {
+      "name": "Info",
+      "value": "Test123",
+      "update": "hover_info ? round(hover_info['Road_s'] - 5483.17627) : 10000"
     }
   ]
 
