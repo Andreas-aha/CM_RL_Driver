@@ -33,22 +33,23 @@ class Server:
         #  Wait for next request from client
         #log.server("Waiting for request...")
 
-        while self.not_recieved_attempts < 1000:
+        while self.not_recieved_attempts < 100:
             try:
                 message = self.zsocket.recv_string()
                 #log.server("Recieved request: %s" % message)
                 self.not_recieved_attempts = 0
-                self.old_msg_roh = message
                 break
             except:
                 #log.server("No request. Retry...")
                 #print("No request. Retry...")
                 self.not_recieved_attempts += 1
-    
-        if self.not_recieved_attempts == 1000:
-            message = self.old_msg_roh
+
+                
+        if self.not_recieved_attempts == 100:
+            Server(14100).send_gui("StartSim")
+            self.not_recieved_attempts = 0
+            return None, 4.04, None
         
-        self.old_msg_roh = message
         # Convert message to np array
         self.state = np.fromstring(message, dtype=np.float32, sep=' ')
 

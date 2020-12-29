@@ -143,6 +143,8 @@ class CarMakerEnv(py_environment.PyEnvironment):
       self._episode_ended = True
     else:
       self._state, self.sim_time, self.s_road = Server(self.tcp_port).server_step(action)
+      if self._state is None:
+        return self._reset()
       reward = (self.s_road - self.s_road_old)*10 / (1 + abs(self._state[1])*4.)
       if self._state[0] < 0.1:
         reward = -1
