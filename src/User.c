@@ -125,10 +125,13 @@ struct tRL_Agent {
     double TCPU_AVG;
     int Signal;
     double RTFac;
+    int eval_ep_cnt;
 };
 struct tRL_Agent RL_Agent = {
     .On = true,
-    .Episodes = 0
+    .Episodes = 0,
+    .Signal = 0,
+    .eval_ep_cnt = 0
 };
 
 char ipc_adress[] = "ipc:///tmp/99999";
@@ -315,7 +318,7 @@ Calc_sRoad_Distance ()
     sRoad_Distance = Vehicle.sRoad + LapNo * Env.Route.Length - sRoad_StartPos;
 
     if (!CheckRoadBorderDist()) {
-        reward_factor = 1/(1 + fabs(Car.ConBdy1.SideSlipAngle)*4);
+        reward_factor = 1/(1 + fabs(Car.ConBdy1.SideSlipAngle)*4)*ovrwrt_drvr;
         reward = (sRoad_Distance - sRoad_Distance_old) * 10 * reward_factor;
     }
     else {
@@ -858,7 +861,16 @@ ddict2json (void)
         LogErrStr(EC_General, "Failed to print monitor.\n");
     }
     FILE * fPtr;
-    sprintf(fn, "SimOutput/rl_uaq_store/ep_%d.json", ep);
+    if (RL_Agent.Signal == 0)
+    {
+        sprintf(fn, "SimOutput/rl_uaq_store/ep_%d.json", ep);
+        RL_Agent.eval_ep_cnt = 1;
+    }
+    else if (RL_Agent.Signal == 1)
+    {
+        sprintf(fn, "SimOutput/rl_uaq_store/ep_%d_%d.json", ep, RL_Agent.eval_ep_cnt);
+        RL_Agent.eval_ep_cnt++;
+    }
     fPtr = fopen(fn, "w");
     if(fPtr == NULL)
     {
@@ -1028,9 +1040,14 @@ ReposVhcl (void)
 
     // Reset pos via DVA to Start Pos:
     tRoadRouteIn CheckST;
-    CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);;
+
+    if (RL_Agent.Signal == 0)
+        CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);
+    else if (RL_Agent.Signal == 1)
+        CheckST.st[0] = 5;
+
     CheckST.st[1] = 0;
-    CheckST.st[0] = 5;
+
 
     tRoadRouteOutExt Out_CheckST;
     w = RoadRouteEvalExt (CheckPath_at_s, NULL, RIT_ST, &CheckST, &Out_CheckST);
@@ -1048,6 +1065,8 @@ ReposVhcl (void)
     rstps->New.Ang[1] = Out_CheckST.nuv[1];
     rstps->New.Ang[2] = rz;
     rstps->Order.DVA = 1;
+
+    counter == 0;
 }
 
 /*
@@ -1141,7 +1160,10 @@ Send_State (int action)
     RL_Agent.TCPU = cpu_time;
     RL_Agent.TCPU_AVG = FILTER_LP1(cpu_time, RL_Agent.TCPU_AVG, 0.1);
     RL_Agent.RTFac = 1E-3/RL_Agent.TCPU_AVG - 0.4;
-    SimCore.TAccel = RL_Agent.RTFac;
+    if (RL_Agent.Signal == 0)
+        SimCore.TAccel = RL_Agent.RTFac;
+    else if (RL_Agent.Signal == 1)
+        SimCore.TAccel = 999999;
 
     if (buf == NULL) {
         zstr_free(&buf);
