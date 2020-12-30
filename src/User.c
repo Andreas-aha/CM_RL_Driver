@@ -1153,7 +1153,7 @@ Send_State (int action)
     zstr_send(requester, out_msg);
     /* Recieve messsage from server */
     clock_t begin = clock();
-    zsock_set_rcvtimeo(requester, 250);
+    zsock_set_rcvtimeo(requester, 1000);
     char *buf = zstr_recv(requester);
     clock_t end = clock();
     double cpu_time = (double)(end - begin) / CLOCKS_PER_SEC;
