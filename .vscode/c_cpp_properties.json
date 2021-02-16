@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/ipg/carmaker/linux64-9.0.1/include"
+                "/opt/ipg/carmaker/linux64-9.1/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

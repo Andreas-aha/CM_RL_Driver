@@ -31,15 +31,15 @@
 extern const char *SetConnectedIO (const char *io);
 
 static const char *CompileLibs[] = {
-    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libcar.a */
-    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libcarmaker.a */
-    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libipgdriver.a */
-    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libipgroad.a */
-    /* /opt/ipg/carmaker/linux64-9.0.2/lib/libipgtire.a */
-    "libcar.a	CarMaker-Car linux64 9.0.2 2020-08-05",
-    "libcarmaker.a	CarMaker linux64 9.0.2 2020-08-05",
-    "libipgdriver.a	IPGDriver linux64 9.0.2 2020-08-04",
-    "libipgroad.a	IPGRoad linux64 9.0.2 2020-08-05",
+    /* /opt/ipg/carmaker/linux64-9.1/lib/libcar.a */
+    /* /opt/ipg/carmaker/linux64-9.1/lib/libcarmaker.a */
+    /* /opt/ipg/carmaker/linux64-9.1/lib/libipgdriver.a */
+    /* /opt/ipg/carmaker/linux64-9.1/lib/libipgroad.a */
+    /* /opt/ipg/carmaker/linux64-9.1/lib/libipgtire.a */
+    "libcar.a	CarMaker-Car linux64 9.1 2020-10-21",
+    "libcarmaker.a	CarMaker linux64 9.1 2020-10-21",
+    "libipgdriver.a	IPGDriver linux64 9.1 2020-10-20",
+    "libipgroad.a	IPGRoad linux64 9.1 2020-10-20",
     "libipgtire.a	IPGTire linux64 9.0.2 2020-06-29",
     NULL
 };
@@ -47,24 +47,25 @@ static const char *CompileLibs[] = {
 
 static const char *CompileFlags[] = {
     "-m64 -fPIC -g -O1 -DLINUX -DLINUX64 -D_GNU_SOURCE",
-    "-D_FILE_OFFSET_BITS=64 -DCM_NUMVER=90002",
-    "-I/opt/ipg/carmaker/linux64-9.0.2/include -Wall",
+    "-D_FILE_OFFSET_BITS=64 -DCM_NUMVER=90100 -DBEAM_FCT",
+    "-I../include -I../lib/linux64 -I../lib",
+    "-I/opt/ipg/carmaker/linux64-9.1/include -Wall",
     "-Wimplicit -Wmissing-prototypes",
     NULL
 };
 
 
 tAppStartInfo   AppStartInfo = {
-    "Car_Generic <insert.your.version.no>",          /* App_Version         */
-    "361",          /* App_BuildVersion    */
-    "aha",     /* App_CompileUser     */
-    "aha-z97x-ud3h",         /* App_CompileSystem   */
-    "2020-11-18 14:26:26",  /* App_CompileTime */
+    "Car_Generic RL_Driver",          /* App_Version         */
+    "979",          /* App_BuildVersion    */
+    "andreas",     /* App_CompileUser     */
+    "andreas-z97x-ud3h.fritz.box",         /* App_CompileSystem   */
+    "2021-01-01 23:35:49",  /* App_CompileTime */
 
     CompileFlags,                /* App_CompileFlags  */
     CompileLibs,                 /* App_Libs          */
 
-    "9.0.2",          /* SetVersion        */
+    "9.1",          /* SetVersion        */
 
     NULL,           /* TestRunName       */
     NULL,           /* TestRunFName      */

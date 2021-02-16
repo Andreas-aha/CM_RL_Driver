@@ -126,12 +126,20 @@ struct tRL_Agent {
     int Signal;
     double RTFac;
     int eval_ep_cnt;
+    double SteerVel;
+    double SteerAcc;
+    double SteerAng;
+    double vel_step_0[3];
 };
 struct tRL_Agent RL_Agent = {
     .On = true,
     .Episodes = 0,
     .Signal = 0,
-    .eval_ep_cnt = 0
+    .eval_ep_cnt = 0,
+    .SteerVel = 0,
+    .SteerAcc = 0,
+    .SteerAng = 0,
+    .steer = 0
 };
 
 char ipc_adress[] = "ipc:///tmp/99999";
@@ -271,15 +279,13 @@ CarMVPreFunc_ResetPos (tCarMVPreIF *IF)
 	if (SimCore.State < SCState_StartLastCycle)
 	    return;
 	
-	Log ("Starting Episode %d at %.2fs.\n", RL_Agent.Episodes+1, SimCore.Time);
+	Log ("Starting Episode %d.\n", RL_Agent.Episodes+1);
     ovrwrt_drvr = false;
 
 	/* -> velocities */
-    double speed_0[3];
     //double speed_fac = (double)rand()/(double)(RAND_MAX/30);
 	//Log ("Setting speed to %.2f m/s\n", speed_fac);
-    VEC_Mul(speed_0, EX3x1, 0);
-	VEC_Assign(IF->v_0,speed_0);
+	VEC_Assign(IF->v_0,RL_Agent.vel_step_0);
 	VEC_Assign(IF->rv_zyx,Null3x1);
 
 	/*Log ("Step2@CycleNo %d: Switching to pos: %0.3fm %0.3fm %0.3fm - %0.3fdeg %0.3fdeg %0.3fdeg\n",
@@ -515,11 +521,14 @@ User_DeclQuants (void)
     DDefInt(NULL , "RL_Agent.Signal" , "-", &(RL_Agent.Signal) , DVA_IO_In);
     DDefDouble4(NULL , "RL_Agent.Reward" , "-", &(reward), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Reward_Factor" , "-", &(reward_factor), DVA_None);
-    DDefDouble4(NULL , "RL_Agent.Steer" , "Nm", &(RL_Agent.steer), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.Steer" , "-", &(RL_Agent.steer), DVA_None);
     DDefDouble4(NULL , "RL_Agent.Gas" , "-", &(RL_Agent.gas), DVA_None);
     DDefDouble4(NULL , "RL_Agent.TCPU" , "s", &(RL_Agent.TCPU), DVA_None);
     DDefDouble4(NULL , "RL_Agent.TCPU_LP1" , "s", &(RL_Agent.TCPU_AVG), DVA_None);
     DDefDouble4(NULL , "RL_Agent.RTFac" , "-", &(RL_Agent.RTFac), DVA_None);
+    DDefDouble4(NULL , "RL_Agent.SteerVel" , "-", &(RL_Agent.SteerVel), DVA_IO_In);
+    DDefDouble4(NULL , "RL_Agent.SteerAng" , "-", &(RL_Agent.SteerAng), DVA_IO_In);
+    DDefDouble4(NULL , "RL_Agent.SteerAcc" , "-", &(RL_Agent.SteerAcc), DVA_IO_In);
 
     DDefDouble4(NULL , "UserTest.RoadBorderDist.0" , "m", &(LSMarkerPos_Add_00), DVA_None);
     DDefDouble4(NULL , "UserTest.RoadBorderDist.L90" , "m", &(LSMarkerPos_Add_L90), DVA_None);
@@ -728,7 +737,7 @@ User_TestRun_Start_atEnd (void)
         *  UserPgm Sensor lays (in this example) on middle
         *  of rear axle on the ground (Y = Z = 0) **/
         if (User.SensorID < 0) {
-        LogWarnF(EC_General,"Vhcl_repos: Can't identify body sensor 'BeamRef' in vehicle dataset!\n=> Car.* signal values used (small offset regarding to Sensor.Inertial.BeamRef.* signal values)");
+        // LogWarnF(EC_General,"Vhcl_repos: Can't identify body sensor 'BeamRef' in vehicle dataset!\n=> Car.* signal values used (small offset regarding to Sensor.Inertial.BeamRef.* signal values)");
         } else {
 
         VEC_Assign(tmpvec,Null3x1);
@@ -869,6 +878,11 @@ ddict2json (void)
     else if (RL_Agent.Signal == 1)
     {
         sprintf(fn, "SimOutput/rl_uaq_store/ep_%d_%d.json", ep, RL_Agent.eval_ep_cnt);
+        RL_Agent.eval_ep_cnt++;
+    }
+    else if (RL_Agent.Signal == 2)
+    {
+        sprintf(fn, "SimOutput/rl_uaq_store/ep_rnd_%d_%d.json", ep, RL_Agent.eval_ep_cnt);
         RL_Agent.eval_ep_cnt++;
     }
     fPtr = fopen(fn, "w");
@@ -1041,7 +1055,7 @@ ReposVhcl (void)
     // Reset pos via DVA to Start Pos:
     tRoadRouteIn CheckST;
 
-    if (RL_Agent.Signal == 0)
+    if (RL_Agent.Signal == 0 || RL_Agent.Signal == 2)
         CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);
     else if (RL_Agent.Signal == 1)
         CheckST.st[0] = 5;
@@ -1066,7 +1080,25 @@ ReposVhcl (void)
     rstps->New.Ang[2] = rz;
     rstps->Order.DVA = 1;
 
-    counter == 0;
+    if (RL_Agent.Signal == 2) {
+        double speed_fac = (double)rand()/(double)(RAND_MAX/20.);
+        Log ("Setting speed to %.2f m/s\n", speed_fac);
+        VEC_Mul(RL_Agent.vel_step_0, Out_CheckST.suv, speed_fac);
+    }
+    else
+    {
+        VEC_Assign(RL_Agent.vel_step_0, Null3x1);
+    }
+
+    RL_Agent.SteerAcc = 0;
+    RL_Agent.SteerVel = 0;
+    RL_Agent.SteerAng = 0;
+
+    int r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, 125, 0, 0, 0, NULL);
+    if (r<0)
+        Log("No DVA write to DM.Steer.Ang possible\n");
+
+    counter = 0;
 }
 
 /*
@@ -1110,35 +1142,34 @@ Send_State (int action)
     double state_array[] = { 
                             State,
                             sRoad_Distance,
-                            Vehicle.v,
-                            Car.ConBdy1.SideSlipAngle,
+                            Vehicle.v/42.,
+                            Car.ConBdy1.SideSlipAngle*4.,
+                            RL_Agent.SteerVel,
+                            RL_Agent.steer,
+                            RL_Agent.SteerAng,
                             InertialSensor[0].Acc_0[0],
                             InertialSensor[0].Acc_0[1],
-                            Car.YawRate,
-                            Steering.IF.Ang,
-                            Steering.IF.AngVel,
-                            Steering.IF.AngAcc/500.,
-                            Steering.IF.TrqStatic,
-                            LongSlip,
-                            Car.FARoadSensor.Route.Deviation.Ang,
-                            LSMarkerPos_Add_00 / 6.,
-                            LSMarkerPos_Add_L90 / 6.,
-                            LSMarkerPos_Add_L60 / 6.,
-                            LSMarkerPos_Add_L30 / 6.,
-                            LSMarkerPos_Add_R90 / 6.,
-                            LSMarkerPos_Add_R60 / 6.,
-                            LSMarkerPos_Add_R30 / 6.,
-                            RoadSensor[0].Route.CurveXY * 40.,
+                            Car.YawRate*10.,
+                            LongSlip*10.,
+                            Car.FARoadSensor.Route.Deviation.Ang*4.,
+                            LSMarkerPos_Add_00 / 12.,
+                            LSMarkerPos_Add_L90 / 12.,
+                            LSMarkerPos_Add_L60 / 12.,
+                            LSMarkerPos_Add_L30 / 12.,
+                            LSMarkerPos_Add_R90 / 12.,
+                            LSMarkerPos_Add_R60 / 12.,
+                            LSMarkerPos_Add_R30 / 12.,
+                            RoadSensor[0].Route.CurveXY * 500.,
                             //RoadSensor[1].Route.CurveXY * 40,
                             //RoadSensor[2].Route.CurveXY * 40,
-                            RoadSensor[3].Route.CurveXY * 40.,
+                            RoadSensor[3].Route.CurveXY * 500.,
                             //RoadSensor[4].Route.CurveXY * 40,
                             //RoadSensor[5].Route.CurveXY * 40,
-                            RoadSensor[6].Route.CurveXY * 40.,
+                            RoadSensor[6].Route.CurveXY * 500.,
                             //RoadSensor[7].Route.CurveXY * 40,
                             //RoadSensor[8].Route.CurveXY * 40,
-                            RoadSensor[9].Route.CurveXY * 40.,
-                            RoadSensor[10].Route.CurveXY * 40.
+                            RoadSensor[9].Route.CurveXY * 500.,
+                            RoadSensor[10].Route.CurveXY * 500.
     };
 
     int i;
@@ -1149,31 +1180,44 @@ Send_State (int action)
         loc += tempLen;
     }
 
-    /* Send messsage to server */
-    zstr_send(requester, out_msg);
-    /* Recieve messsage from server */
-    clock_t begin = clock();
-    zsock_set_rcvtimeo(requester, 1000);
-    char *buf = zstr_recv(requester);
-    clock_t end = clock();
-    double cpu_time = (double)(end - begin) / CLOCKS_PER_SEC;
-    RL_Agent.TCPU = cpu_time;
-    RL_Agent.TCPU_AVG = FILTER_LP1(cpu_time, RL_Agent.TCPU_AVG, 0.1);
-    RL_Agent.RTFac = 1E-3/RL_Agent.TCPU_AVG - 0.4;
-    if (RL_Agent.Signal == 0)
-        SimCore.TAccel = RL_Agent.RTFac;
-    else if (RL_Agent.Signal == 1)
-        SimCore.TAccel = 999999;
+    char *loc_buf = NULL;
 
-    if (buf == NULL) {
-        zstr_free(&buf);
+    int r = 0;
+
+    clock_t start, end;
+    start = clock();
+
+    while (loc_buf == NULL && r < 100)
+    {
+        /* Send messsage to server */
+        zstr_send(requester, out_msg);
+        /* Recieve messsage from server */
+        zsock_set_rcvtimeo(requester, 1000);
+        loc_buf = zstr_recv(requester);
+        if (r > 0) Log("No action for %d000 ms.\n", r);        
+        r++;
+    }
+
+    end = clock();
+    double cpu_time = ((double) (end - start)) / (double) CLOCKS_PER_SEC;
+    RL_Agent.TCPU = cpu_time;
+    RL_Agent.RTFac = (0.001/RL_Agent.TCPU - 0.1) >= 1. ? (0.001/RL_Agent.TCPU - 0.4) : 1.;
+    SimCore.TAccel = RL_Agent.Signal == 0 ? RL_Agent.RTFac : 999999;
+    
+    r = DVA_WriteRequest("SC.TAccel", OWMode_Abs, 125, 0, 0, SimCore.TAccel, NULL);
+    if (r<0)
+        Log("No DVA write to SC.TAccel possible\n");
+
+    if (loc_buf != NULL) {
         zsock_destroy(&requester);
-        char *buf1 = "0 0";
-        return buf1;
+        return loc_buf;
     }
     else {
+        zstr_free(&loc_buf);
         zsock_destroy(&requester);
-        return buf;
+        char *buf1 = "0 0";
+        LogWarnStr(EC_General, "No action from agent recieved.\n");
+        return buf1;
     }    
 }
 
@@ -1392,10 +1436,26 @@ User_Calc (double dt)
     if (!RL_Agent.On) 
         return 0;
     
+    RL_Agent.SteerAcc = RL_Agent.steer / 800.;
+    RL_Agent.SteerVel += RL_Agent.SteerAcc;
+    
+    if (RL_Agent.SteerVel >= 4.) 
+    {
+        RL_Agent.SteerVel = 3.9999999;
+    }
+    else if (RL_Agent.SteerVel <= -4.)
+    {
+        RL_Agent.SteerVel = -3.9999999;    
+    } 
+
+    RL_Agent.SteerAng += RL_Agent.SteerVel / 1000.;
+    RL_Agent.SteerAng = RL_Agent.SteerAng >  8. ?  7.999999 : RL_Agent.SteerAng;
+    RL_Agent.SteerAng = RL_Agent.SteerAng < -8. ? -7.999999 : RL_Agent.SteerAng;
+
     int r;
-    r = DVA_WriteRequest("DM.Steer.Trq", OWMode_Abs, 1, 0, 0, RL_Agent.steer, NULL);
+    r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, 125, 0, 0, RL_Agent.SteerAng, NULL);
     if (r<0)
-        Log("No DVA write to DM.Steer.Trq possible\n");
+        Log("No DVA write to DM.Steer.Ang possible\n");
     
     return 0;
 }

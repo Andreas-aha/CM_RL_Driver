@@ -93,8 +93,8 @@ CM_Main.o: CM_Main.c /opt/ipg/carmaker/linux64-9.1/include/Global.h \
  /opt/ipg/carmaker/linux64-9.1/include/Car/Trailer_Brake.h \
  /opt/ipg/carmaker/linux64-9.1/include/CycleControl.h \
  /opt/ipg/carmaker/linux64-9.1/include/adtf.h \
- /opt/ipg/carmaker/linux64-9.1/include/ADASRP.h User.h IOVec.h \
- /opt/ipg/carmaker/linux64-9.1/include/CM_XCP.h \
+ /opt/ipg/carmaker/linux64-9.1/include/ADASRP.h User.h ../include/cJSON.h \
+ IOVec.h /opt/ipg/carmaker/linux64-9.1/include/CM_XCP.h \
  /opt/ipg/carmaker/linux64-9.1/include/CM_CCP.h \
  /opt/ipg/carmaker/linux64-9.1/include/SimNet.h
 CM_Vehicle.o: CM_Vehicle.c /opt/ipg/carmaker/linux64-9.1/include/Global.h \
@@ -146,7 +146,7 @@ CM_Vehicle.o: CM_Vehicle.c /opt/ipg/carmaker/linux64-9.1/include/Global.h \
  /opt/ipg/carmaker/linux64-9.1/include/Car/Car.h \
  /opt/ipg/carmaker/linux64-9.1/include/Car/Susp.h \
  /opt/ipg/carmaker/linux64-9.1/include/Vehicle/VehicleControlApps.h \
- User.h
+ User.h ../include/cJSON.h
 IO.o: IO.c /opt/ipg/carmaker/linux64-9.1/include/Global.h \
  /opt/ipg/carmaker/linux64-9.1/include/CarMaker.h \
  /opt/ipg/carmaker/linux64-9.1/include/system.h \
@@ -245,5 +245,6 @@ User.o: User.c /opt/ipg/carmaker/linux64-9.1/include/Global.h \
  /opt/ipg/carmaker/linux64-9.1/include/flex_rbs.h \
  /opt/ipg/carmaker/linux64-9.1/include/rbs.h \
  /opt/ipg/carmaker/linux64-9.1/include/can_rbs.h IOVec.h User.h \
+ ../include/cJSON.h ../include/cJSON2.h ../include/cJSON.h \
  /opt/ipg/carmaker/linux64-9.1/include/Vehicle/Sensor_Line.h \
  /opt/ipg/carmaker/linux64-9.1/include/Vehicle/Sensor_Inertial.h

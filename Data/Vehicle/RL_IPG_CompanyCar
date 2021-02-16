@@ -1,6 +1,6 @@
 #INFOFILE1.1 - Do not remove this line!
 FileIdent = CarMaker-Car 9
-FileCreator = CarMaker 2020-12-25 15:36:18
+FileCreator = CarMaker 2020-12-31 12:09:37
 
 
 ## Assembly ##############################################################
@@ -319,15 +319,9 @@ Susp.Comment:
 
 
 ## Steering ##############################################################
-Steering.Kind = GenTorque 1
+Steering.Kind = GenAngle 1
 Steering.Comment:
 Steering.Rack2StWhl = 94.853
-Steering.Wheel.I = 0.001
-Steering.Wheel.d = 1.0
-Steering.Rack.mass = 10.0
-Steering.Rack.d = 50.0
-Steering.Rack.travel = 0.08
-Steering.Amplify = 3.0
 
 
 ## Tires #################################################################

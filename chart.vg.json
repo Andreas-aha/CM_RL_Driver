@@ -2,7 +2,7 @@
   "$schema": "https://vega.github.io/schema/vega/v5.json",
   "description": "Plotting CM Data",
   "width": 800,
-  "height": 650,
+  "height": 600,
   "padding": 35,
 
   "config": {
@@ -24,7 +24,7 @@
     },
     {
       "name": "RLVhclData",
-      "url": "SimOutput/rl_uaq_store/ep_903396.json",
+      "url": "RL/rl_data/run20210101-no_sideslip_pen/rl_uaq_store/ep_13076_1.json",
       "transform": [
         {
           "type": "window",
@@ -37,7 +37,7 @@
         },
         {
           "type": "filter", 
-          "expr": "datum['Vhcl\\.sRoad']-7712 <= Info"
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
         }
       ]
     },
@@ -244,11 +244,11 @@
       "encode": {
         "update": {
           "x": {
-            "signal": "datum['Vhcl\\.PoI\\.x'] - datum['DM\\.Steer\\.Ang']* 20 * sin(datum['Vhcl\\.Yaw'])",
+            "signal": "datum['Vhcl\\.PoI\\.x'] - datum['Steer\\.WhlAng']* 20 * sin(datum['Vhcl\\.Yaw'])",
             "scale": "xscale"
           },
           "y": {
-            "signal": "datum['Vhcl\\.PoI\\.y'] + datum['DM\\.Steer\\.Ang']* 20 * cos(datum['Vhcl\\.Yaw'])",
+            "signal": "datum['Vhcl\\.PoI\\.y'] + datum['Steer\\.WhlAng']* 20 * cos(datum['Vhcl\\.Yaw'])",
             "scale": "yscale"
           },
           "strokeWidth":{"signal": "linesize"},

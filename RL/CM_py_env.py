@@ -77,7 +77,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
   def action_spec(self):
     return array_spec.BoundedArraySpec(
       shape=(2,), dtype=np.float32, 
-      minimum=[-1, -4.999], maximum=[1, 4.999], 
+      minimum=[-1., -4.], maximum=[1., 4.], 
       name='action')
 
   def observation_spec(self):
@@ -118,7 +118,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
       # Action [5.,5.] signals CM, that Episode ended.
       Server(self.tcp_port).server_step([5.,5.])
 
-    for _ in range(3):
+    for _ in range(8):
       # Todo: check static
       Server(self.tcp_port).server_step()
 
@@ -139,15 +139,13 @@ class CarMakerEnv(py_environment.PyEnvironment):
       return self._reset()
 
     if self.sim_time < 4.05 and self.sim_time > 4.03:
-      reward = -np.square(self._state[0])*0.01
+      reward = -np.square(self._state[0])*0.001
       self._episode_ended = True
     else:
       self._state, self.sim_time, self.s_road = Server(self.tcp_port).server_step(action)
       if self._state is None:
         return self._reset()
-      reward = (self.s_road - self.s_road_old)*10 / (1 + abs(self._state[1])*4.)
-      if self._state[0] < 0.1:
-        reward = -1
+      reward = (self.s_road - self.s_road_old) / (1 + abs(self._state[2]))
       self.s_road_old = self.s_road
 
 

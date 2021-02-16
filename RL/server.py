@@ -33,11 +33,13 @@ class Server:
         #  Wait for next request from client
         #log.server("Waiting for request...")
 
-        while self.not_recieved_attempts < 100:
+        while self.not_recieved_attempts < 400:
             try:
                 message = self.zsocket.recv_string()
-                #log.server("Recieved request: %s" % message)
                 self.not_recieved_attempts = 0
+                #  Send reply back to client
+                s_ctrl = str(action[0]) + " " + str(action[1])
+                self.zsocket.send_string(s_ctrl)
                 break
             except:
                 #log.server("No request. Retry...")
@@ -45,8 +47,9 @@ class Server:
                 self.not_recieved_attempts += 1
 
                 
-        if self.not_recieved_attempts == 100:
+        if self.not_recieved_attempts == 400:
             Server(14100).send_gui("StartSim")
+            Server(14100).send_gui("SessionLogMsg {Lost connection}")
             self.not_recieved_attempts = 0
             return None, 4.04, None
         
@@ -58,25 +61,15 @@ class Server:
         array_has_inf = np.isinf(array_sum)
 
         if array_has_nan or array_has_inf:
-            #print("Nan detected")
-            try:
-                self.state = self.old_msg
-            except:
-                pass
-        else:
-            self.old_msg = self.state
+            Server(14100).send_gui("SessionLogWarn {Obs array has nan or inf}")
+            Server(14100).send_gui("StopSim")
+            Server(14100).send_gui("StartSim")
+            self.not_recieved_attempts = 0
+            return None, 4.04, None
 
         self.sim_time = self.state[0]
         self.s_road = self.state[1]
         self.state = np.delete(self.state, [0, 1])
-    
-        #  Send reply back to client
-        s_ctrl = str(action[0]) + " " + str(action[1])
-
-        #log.server("Sending action:" + " %s" % s_ctrl)
-        self.zsocket.send_string(s_ctrl)
-
-        #print(self.state, self.sim_time, self.s_road)
 
         return self.state, self.sim_time, self.s_road
 

@@ -48,7 +48,11 @@ DStore.Quantities.normal:
 	RL_Agent.On
 	RL_Agent.Reward
 	RL_Agent.Reward_Factor
+	RL_Agent.Signal
 	RL_Agent.Steer
+	RL_Agent.SteerAcc
+	RL_Agent.SteerAng
+	RL_Agent.SteerVel
 	SC.State
 	SC.TAccel
 	Sensor.Road.RD001.PreviewDist
