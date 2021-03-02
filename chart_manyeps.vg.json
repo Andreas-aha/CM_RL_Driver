@@ -1,0 +1,908 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Plotting CM Data",
+  "width": 500,
+  "height": 450,
+  "padding": 35,
+
+  "config": {
+    "axis": {
+      "domain": false,
+      "labelFontSize": 14,
+      "tickSize": 0
+    }
+  },
+
+  "data": [
+    {
+      "name": "RoadData",
+      "url": "doc/Data/route_8.json",
+      "transform": [
+        { "type": "extent", "field": "Road_l_x", "signal": "xext" },
+        { "type": "extent", "field": "Road_l_x", "signal": "yext" }
+      ]
+    },
+    {
+      "name": "RLVhclData",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_112_3.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData1",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_136_2.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData2",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_172_8.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData3",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_202_1.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData4",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_223_6.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData5",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_239_4.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData6",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_259_1.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData7",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_276_1.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData8",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_285_1.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData9",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_294_4.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData10",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_302_1.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    },
+    {
+      "name": "RLVhclData11",
+      "url": "RL/rl_data/first_trial_1/rl_uaq_store/ep_311_2.json",
+      "transform": [
+        {
+          "type": "window",
+          "ops": ["rank"],
+          "as": ["rank"]
+        },
+        {
+          "type": "filter", 
+          "expr": "datum.rank <= timeslider*8"
+        },
+        {
+          "type": "filter", 
+          "expr": "datum['Vhcl\\.sRoad'] <= Info"
+        }
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "xscale", "zero": false,
+      "padding": 20,
+      "domain": {"signal": "xdom"},
+      "range": {"signal": "xrange"}
+    },
+    {
+      "name": "yscale", "zero": false,
+      "padding": 20,
+      "domain": {"signal": "ydom"},
+      "range": {"signal": "yrange"}
+    },
+    {
+      "name": "color",
+      "type": "linear",
+      "range": {"scheme": "Turbo"},
+      "reverse": true,
+      "domain": {"data": "RLVhclData", "field": "Vhcl\\.v"}
+    }
+  ],
+
+  "axes": [
+    {
+      "orient": "top",
+      "scale": "xscale",
+      "tickCount": 8,
+      "grid": true,
+      "offset": {"signal": "xoffset"},
+      "title": "x-Coordinates [m]",
+      "titleFontSize": 12,
+      "titlePadding": -60
+    },
+    {
+      "orient": "right",
+      "scale": "yscale",
+      "tickCount": 8,
+      "grid": true,
+      "offset": {"signal": "yoffset"},
+      "title": "y-Coordinates [m]",
+      "titleFontSize": 12,
+      "titlePadding": -60,
+      "titleAngle": -90
+    }
+  ],
+
+  "legends": [
+    {
+      "fill": "color",
+      "type": "gradient",
+      "title": "Vehicle v [m/s]",
+      "titleFontSize": 12,
+      "titlePadding": 4,
+      "gradientLength": {"signal": "height - 16"}
+    }
+  ],
+
+  "marks": [
+    {
+      "name": "road_left_side",
+      "type": "line",
+      "interpolate": "basis",
+      "from": {"data": "RoadData"},
+      "clip": true,
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Road_l_x"},
+          "y": {"scale": "yscale", "field": "Road_l_y"},
+          "stroke": {"value": "grey"},
+          "strokeWidth":{"signal": "linesize"}
+        }       
+      }
+    },
+    {
+      "name": "road_right_side",
+      "type": "line",
+      "interpolate": "basis",
+      "from": {"data": "RoadData"},
+      "clip": true,
+      "encode": {
+        "enter":{
+          "stroke": {"value": "grey"}
+        },
+        "update": {
+          "x": {"scale": "xscale", "field": "Road_r_x"},
+          "y": {"scale": "yscale", "field": "Road_r_y"},
+          "strokeWidth":{"signal": "linesize"}
+        }
+       
+      }
+    },
+    {
+      "name": "road_center",
+      "type": "symbol",
+      "from": {"data": "RoadData"},
+      "clip": true,
+      "zindex": 1,
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Road_c_x"},
+          "y": {"scale": "yscale", "field": "Road_c_y"},
+          "size":{"signal": "size*10"},
+          "fill": {"value": "transparent"}
+        }
+       
+      }
+    },
+    {
+      "name": "RLVhclPos",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver0"}
+        }
+      }
+    },
+    {
+      "name": "IPGVhclPos",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData1"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver1"}
+        }
+      }
+    },
+    {
+      "name": "Car2",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData2"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver2"}
+        }
+      }
+    },
+    {
+      "name": "Car3",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData3"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver3"}
+        }
+      }
+    },
+    {
+      "name": "Car4",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData4"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver4"}
+        }
+      }
+    },
+    {
+      "name": "Car5",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData5"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver5"}
+        }
+      }
+    },
+    {
+      "name": "Car6",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData6"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver6"}
+        }
+      }
+    },
+    {
+      "name": "Car7",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData7"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver7"}
+        }
+      }
+    },
+    {
+      "name": "Car8",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData8"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver8"}
+        }
+      }
+    },
+    {
+      "name": "Car9",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData9"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver9"}
+        }
+      }
+    },
+    {
+      "name": "Car10",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData10"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver10"}
+        }
+      }
+    },
+    {
+      "name": "Car11",
+      "type": "symbol",
+      "interpolate": "basis",
+      "clip": true,
+      "from": {"data": "RLVhclData11"},
+      "encode": {
+        "update": {
+          "x": {"scale": "xscale", "field": "Vhcl\\.PoI\\.x"},
+          "y": {"scale": "yscale", "field": "Vhcl\\.PoI\\.y"},
+          "angle": {"signal": "datum['Vhcl\\.Yaw'] * -57.29577951 + 90"},
+          "shape": {"value": "wedge"},
+          "fill": {"scale": "color", "field": "Vhcl\\.v"},
+          "size":{"signal": "size/12"},
+          "opacity": {"signal": "show_rldriver11"}
+        }
+      }
+    }
+  ],
+  
+  "signals": [
+    {
+      "name": "margin",
+      "value": 20
+    },
+    {
+      "name": "hover",
+      "on": [
+        {"events": "*:mouseover", "encode": "hover"},
+        {"events": "*:mouseout",  "encode": "leave"},
+        {"events": "*:mousedown", "encode": "select"},
+        {"events": "*:mouseup",   "encode": "release"}
+      ]
+    },
+    {
+      "name": "xoffset",
+      "update": "-(height + padding.bottom)"
+    },
+    {
+      "name": "yoffset",
+      "update": "-(width + padding.left)"
+    },
+    { "name": "xrange", "update": "[0, width]" },
+    { "name": "yrange", "update": "[height, 0]" },
+
+    {
+      "name": "down", "value": null,
+      "on": [
+        {"events": "touchend", "update": "null"},
+        {"events": "mousedown, touchstart", "update": "xy()"}
+      ]
+    },
+    {
+      "name": "xcur", "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "slice(xdom)"
+        }
+      ]
+    },
+    {
+      "name": "ycur", "value": null,
+      "on": [
+        {
+          "events": "mousedown, touchstart, touchend",
+          "update": "slice(ydom)"
+        }
+      ]
+    },
+    {
+      "name": "delta", "value": [0, 0],
+      "on": [
+        {
+          "events": [
+            {
+              "source": "window", "type": "mousemove", "consume": true,
+              "between": [{"type": "mousedown"}, {"source": "window", "type": "mouseup"}]
+            },
+            {
+              "type": "touchmove", "consume": true,
+              "filter": "event.touches.length === 1"
+            }
+          ],
+          "update": "down ? [down[0]-x(), y()-down[1]] : [0,0]"
+        }
+      ]
+    },
+
+    {
+      "name": "anchor", "value": [0, 0],
+      "on": [
+        {
+          "events": "wheel",
+          "update": "[invert('xscale', x()), invert('yscale', y())]"
+        },
+        {
+          "events": {"type": "touchstart", "filter": "event.touches.length===2"},
+          "update": "[(xdom[0] + xdom[1]) / 2, (ydom[0] + ydom[1]) / 2]"
+        }
+      ]
+    },
+    {
+      "name": "zoom", "value": 1,
+      "on": [
+        {
+          "events": "wheel!",
+          "force": true,
+          "update": "pow(1.004, event.deltaY * pow(16, event.deltaMode))"
+        },
+        {
+          "events": {"signal": "dist2"},
+          "force": true,
+          "update": "dist1 / dist2"
+        }
+      ]
+    },
+    {
+      "name": "dist1", "value": 0,
+      "on": [
+        {
+          "events": {"type": "touchstart", "filter": "event.touches.length===2"},
+          "update": "pinchDistance(event)"
+        },
+        {
+          "events": {"signal": "dist2"},
+          "update": "dist2"
+        }
+      ]
+    },
+    {
+      "name": "dist2", "value": 0,
+      "on": [{
+        "events": {"type": "touchmove", "consume": true, "filter": "event.touches.length===2"},
+        "update": "pinchDistance(event)"
+      }]
+    },
+
+    {
+      "name": "xdom", "update": "slice(xext)",
+      "on": [
+        {
+          "events": {"signal": "delta"},
+          "update": "[xcur[0] + span(xcur) * delta[0] / width, xcur[1] + span(xcur) * delta[0] / width]"
+        },
+        {
+          "events": {"signal": "zoom"},
+          "update": "[anchor[0] + (xdom[0] - anchor[0]) * zoom, anchor[0] + (xdom[1] - anchor[0]) * zoom]"
+        }
+      ]
+    },
+    {
+      "name": "ydom", "update": "slice(yext)",
+      "on": [
+        {
+          "events": {"signal": "delta"},
+          "update": "[ycur[0] + span(ycur) * delta[1] / height, ycur[1] + span(ycur) * delta[1] / height]"
+        },
+        {
+          "events": {"signal": "zoom"},
+          "update": "[anchor[1] + (ydom[0] - anchor[1]) * zoom, anchor[1] + (ydom[1] - anchor[1]) * zoom]"
+        }
+      ]
+    },
+    {
+      "name": "size",
+      "update": "clamp(100000 / span(xdom), 1, 10000)"
+    },
+    {
+      "name": "linesize",
+      "update": "clamp(400 / span(xdom), 1, 1000)"
+    },
+    {
+      "name": "show_rldriver0",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver0"
+      }
+    },
+    {
+      "name": "show_rldriver1",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver1"
+      }
+    },
+    {
+      "name": "show_rldriver2",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver2"
+      }
+    },
+    {
+      "name": "show_rldriver3",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver3"
+      }
+    },
+    {
+      "name": "show_rldriver4",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver4"
+      }
+    },
+    {
+      "name": "show_rldriver5",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver5"
+      }
+    },
+    {
+      "name": "show_rldriver6",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver6"
+      }
+    },
+    {
+      "name": "show_rldriver7",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver7"
+      }
+    },
+    {
+      "name": "show_rldriver8",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver8"
+      }
+    },
+    {
+      "name": "show_rldriver9",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver9"
+      }
+    },
+    {
+      "name": "show_rldriver10",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver10"
+      }
+    },
+    {
+      "name": "show_rldriver11",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver11"
+      }
+    },
+    {
+      "name": "show_rldriver_steer",
+      "value": 0,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show RL-Driver Steering"
+      }
+    },
+    {
+      "name": "show_ipgdriver",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show IPG-Driver"
+      }
+    },
+    {
+      "name": "show_ipgdriver_steer",
+      "value": 1,
+      "bind":{
+        "input": "checkbox",
+        "name": "Show IPG-Driver Steering"
+      }
+    },
+    {
+      "name": "timeslider",
+      "init": "20",
+      "on":[
+        {
+        "events": {"signal": "timer"},
+        "update": "timeslider + play_speed/10"
+        }
+      ],
+      "bind":{
+        "input": "range",
+        "name": "Cars at Time:",
+        "min": 0,
+        "max": 180,
+        "step": 1
+      }
+    },
+    {
+      "name": "timer",
+      "init": "0",
+      "on": [{"events": {"type": "timer", "throttle": 100}, "update": "timer + play_speed/10*play"}]
+    },
+    {
+      "name": "play_speed",
+      "value": 0,
+      "bind":{
+        "input": "range",
+        "name": "Playback Speed:",
+        "min": -3,
+        "max": 3,
+        "step": 0.1
+      }
+    },
+    {
+      "name": "play",
+      "init": "0",
+      "bind":{
+        "input": "checkbox",
+        "name": "Play"
+      }
+    },
+    {
+      "name": "hover_info",
+      "value": null,
+      "on": [
+        {"events": "@road_center:mouseover", "update": "datum"},
+        {"events": "@road_center:mouseout", "update": "null"}
+      ]
+    },
+    {
+      "name": "Info",
+      "value": "Test123",
+      "update": "hover_info ? round(hover_info['Road_s'] - 5483.17627) : 10000"
+    }
+  ]
+
+}
