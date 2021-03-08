@@ -6,15 +6,15 @@ import numpy as np
 import re
 import math
 
-DIRECTORY = "RL/rl_data/first_trial_1/rl_uaq_store"
+DIRECTORY = "RL/rl_data/first_trial_v-xy/rl_uaq_store"
 min_ep_dist = 50
 last_ep_num = -min_ep_dist
 
 appended_data = []
 hists = {}
 
-rows = 2
-cols = 3
+rows = 4
+cols = 4
 fig, axs = plt.subplots(rows, cols, sharex=True, sharey=True)
 
 file_list = os.listdir(DIRECTORY)[::-1]
@@ -32,8 +32,8 @@ for file in file_list:
             last_ep_num = ep_num
             data = pd.read_json(JSON_FILE)
             data['filename'] = file
-            r = rows-1 - math.floor(i/cols)
-            c = cols-1 - i - r*cols
+            r = math.floor(i/cols)
+            c = i - r*cols
             plt.sca(axs[r, c])
             plt.minorticks_on()
             data['RL_Agent.SteerAng'].plot.hist(bins=11, alpha=0.8, density=True, grid=True)
