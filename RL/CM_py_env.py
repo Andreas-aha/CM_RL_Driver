@@ -77,7 +77,7 @@ class CarMakerEnv(py_environment.PyEnvironment):
   def action_spec(self):
     return array_spec.BoundedArraySpec(
       shape=(2,), dtype=np.float32, 
-      minimum=[-1., -4.], maximum=[1., 4.], 
+      minimum=[-1., -9.42], maximum=[1., 9.42], 
       name='action')
 
   def observation_spec(self):
@@ -145,7 +145,8 @@ class CarMakerEnv(py_environment.PyEnvironment):
       self._state, self.sim_time, self.s_road = Server(self.tcp_port).server_step(action)
       if self._state is None:
         return self._reset()
-      reward = (self.s_road - self.s_road_old) / (1 + abs(self._state[2]))
+      reward = (self.s_road - self.s_road_old)
+      #reward = self._state[0] * np.cos(self._state[3])
       self.s_road_old = self.s_road
 
 

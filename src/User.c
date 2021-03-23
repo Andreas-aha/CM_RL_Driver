@@ -1056,7 +1056,8 @@ ReposVhcl (void)
     tRoadRouteIn CheckST;
 
     if (RL_Agent.Signal == 0 || RL_Agent.Signal == 2)
-        CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);
+        CheckST.st[0] = 5;
+        //CheckST.st[0] = (double)rand()/(double)(RAND_MAX/Env.Route.Length);
     else if (RL_Agent.Signal == 1)
         CheckST.st[0] = 5;
 
@@ -1138,20 +1139,26 @@ Send_State (int action)
     double LongSlip =   (Vehicle.FR.LongSlip + Vehicle.FL.LongSlip + \
                             Vehicle.RR.LongSlip + Vehicle.RL.LongSlip)/4;
 
+
+    double tCoord = Vehicle.tRoad - Car.FARoadSensor.Act.Width/2.;
+
+
     /* Define message to server */
     double state_array[] = { 
                             State,
                             sRoad_Distance,
-                            Vehicle.v/42.,
-                            Car.ConBdy1.SideSlipAngle*4.,
-                            RL_Agent.SteerVel,
-                            RL_Agent.steer,
+                            Vehicle.PoI_Vel_1[0],
+                            Vehicle.PoI_Vel_1[1],
+                            tCoord,
                             RL_Agent.SteerAng,
+                            Car.FARoadSensor.Route.Deviation.Ang*4.,
+                            //RL_Agent.SteerVel,
+                            //RL_Agent.steer,
                             InertialSensor[0].Acc_0[0],
                             InertialSensor[0].Acc_0[1],
-                            Car.YawRate*10.,
-                            LongSlip*10.,
-                            Car.FARoadSensor.Route.Deviation.Ang*4.,
+                            Car.YawAcc,
+                            Car.PitchAcc,
+                            Car.RollAcc,
                             LSMarkerPos_Add_00 / 12.,
                             LSMarkerPos_Add_L90 / 12.,
                             LSMarkerPos_Add_L60 / 12.,
@@ -1201,10 +1208,10 @@ Send_State (int action)
     end = clock();
     double cpu_time = ((double) (end - start)) / (double) CLOCKS_PER_SEC;
     RL_Agent.TCPU = cpu_time;
-    RL_Agent.RTFac = (0.001/RL_Agent.TCPU - 0.1) >= 1. ? (0.001/RL_Agent.TCPU - 0.4) : 1.;
-    SimCore.TAccel = RL_Agent.Signal == 0 ? RL_Agent.RTFac : 999999;
+    //RL_Agent.RTFac = (0.001/RL_Agent.TCPU - 0.1) >= 1. ? (0.001/RL_Agent.TCPU - 0.4) : 1.;
+    //SimCore.TAccel = RL_Agent.Signal == 0 ? RL_Agent.RTFac : 999999;
     
-    r = DVA_WriteRequest("SC.TAccel", OWMode_Abs, 125, 0, 0, SimCore.TAccel, NULL);
+    //r = DVA_WriteRequest("SC.TAccel", OWMode_Abs, 125, 0, 0, SimCore.TAccel, NULL);
     if (r<0)
         Log("No DVA write to SC.TAccel possible\n");
 
@@ -1234,17 +1241,26 @@ Send_State (int action)
 void
 Update_RoadSensorPrevDist () 
 {
-    RoadSensor[0].PreviewDist = 1 + Vehicle.v * 1.0;
-    RoadSensor[1].PreviewDist = 1 + Vehicle.v * 1.2;
-    RoadSensor[2].PreviewDist = 1 + Vehicle.v * 1.4;
-    RoadSensor[3].PreviewDist = 1 + Vehicle.v * 1.6;
-    RoadSensor[4].PreviewDist = 1 + Vehicle.v * 1.8;
-    RoadSensor[5].PreviewDist = 1 + Vehicle.v * 2.0;
-    RoadSensor[6].PreviewDist = 1 + Vehicle.v * 2.2;
-    RoadSensor[7].PreviewDist = 1 + Vehicle.v * 2.4;
-    RoadSensor[8].PreviewDist = 1 + Vehicle.v * 2.6;
-    RoadSensor[9].PreviewDist = 1 + Vehicle.v * 2.8;
-    RoadSensor[10].PreviewDist = 1 + Vehicle.v * 3.4;
+    
+    RoadSensor[0].PreviewDist = 1 + Vehicle.v * 0.0;
+    RoadSensor[1].PreviewDist = 1 + Vehicle.v * .2;
+    RoadSensor[2].PreviewDist = 1 + Vehicle.v * .4;
+    RoadSensor[3].PreviewDist = 1 + Vehicle.v * .6;
+    RoadSensor[4].PreviewDist = 1 + Vehicle.v * .8;
+    RoadSensor[5].PreviewDist = 1 + Vehicle.v * 1.0;
+    RoadSensor[6].PreviewDist = 1 + Vehicle.v * 1.2;
+    RoadSensor[7].PreviewDist = 1 + Vehicle.v * 1.4;
+    RoadSensor[8].PreviewDist = 1 + Vehicle.v * 1.6;
+    RoadSensor[9].PreviewDist = 1 + Vehicle.v * 1.8;
+    RoadSensor[10].PreviewDist = 1 + Vehicle.v * 2.4;
+    
+    /*
+    RoadSensor[0].PreviewDist = 0;
+    RoadSensor[1].PreviewDist = 5;
+    RoadSensor[2].PreviewDist = 10;
+    RoadSensor[3].PreviewDist = 15;
+    RoadSensor[4].PreviewDist = 20;
+    */
 }
 
 int
@@ -1253,6 +1269,7 @@ CheckRoadBorderDist ()
     double MinDist = 1.5;
     int res;
 
+
     if (LSMarkerPos_Add_00 < 2) res = -1;
     else if (LSMarkerPos_Add_L30 < MinDist) res =  -1;
     else if (LSMarkerPos_Add_L60 < MinDist) res =  -1;
@@ -1260,8 +1277,9 @@ CheckRoadBorderDist ()
     else if (LSMarkerPos_Add_R30 < MinDist) res =  -1;
     else if (LSMarkerPos_Add_R60 < MinDist) res =  -1;
     else if (LSMarkerPos_Add_R90 < MinDist) res =  -1;
+    else if (fabs(RoadSensor[0].Route.Deviation.Ang) >= 1.57) res =  -1;
     else res =  0;
-
+    
     return res;
 }
 
@@ -1290,7 +1308,7 @@ User_VehicleControl_Calc (double dt)
 
     if(counter % 25 == 0) {
         if (ovrwrt_drvr && SimCore.Time > 1) {
-            if (CheckRoadBorderDist() == -1 || fabs(Car.FARoadSensor.Route.Deviation.Ang) > 1.) {
+            if (CheckRoadBorderDist() == -1) {
                 //printf("Porting car 1\n");
 
                 ovrwrt_drvr = false;
@@ -1435,22 +1453,8 @@ User_Calc (double dt)
 
     if (!RL_Agent.On) 
         return 0;
-    
-    RL_Agent.SteerAcc = RL_Agent.steer / 800.;
-    RL_Agent.SteerVel += RL_Agent.SteerAcc;
-    
-    if (RL_Agent.SteerVel >= 4.) 
-    {
-        RL_Agent.SteerVel = 3.9999999;
-    }
-    else if (RL_Agent.SteerVel <= -4.)
-    {
-        RL_Agent.SteerVel = -3.9999999;    
-    } 
 
-    RL_Agent.SteerAng += RL_Agent.SteerVel / 1000.;
-    RL_Agent.SteerAng = RL_Agent.SteerAng >  8. ?  7.999999 : RL_Agent.SteerAng;
-    RL_Agent.SteerAng = RL_Agent.SteerAng < -8. ? -7.999999 : RL_Agent.SteerAng;
+    RL_Agent.SteerAng = RL_Agent.steer;
 
     int r;
     r = DVA_WriteRequest("DM.Steer.Ang", OWMode_Abs, 125, 0, 0, RL_Agent.SteerAng, NULL);

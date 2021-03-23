@@ -97,6 +97,8 @@ DStore.Quantities.normal:
 	VC.Lights.IndL
 	Vhcl.FL.LongSlip
 	Vhcl.FR.LongSlip
+	Vhcl.PoI.vx
+	Vhcl.PoI.vy
 	Vhcl.PoI.x
 	Vhcl.PoI.y
 	Vhcl.RL.LongSlip
