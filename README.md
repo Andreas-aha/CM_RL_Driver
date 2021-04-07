@@ -1,5 +1,5 @@
-# CM_RL_Driver
-Repo for bachelor thesis "Soft Actor-Critic as Race Driver in CarMaker"
+# Soft Actor-Critic as Race Driver in CarMaker
+Repository for bachelor thesis "Soft Actor-Critic as Race Driver in CarMaker"
 This repo contains a project folder for CM and the thesis.
 
 
