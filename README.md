@@ -1,8 +1,7 @@
 # CM_RL_Driver
-Repo for bachelor thesis "Examination of Deep Reinforcement Learning Algorithms as Race Driver Model in CarMaker"
-This repo contains a project folder for CM.
+Repo for bachelor thesis "Soft Actor-Critic as Race Driver in CarMaker"
+This repo contains a project folder for CM and the thesis.
 
-This repo is not cleaned yet.
 
 # Running this project
 CarMaker.linux64 needs to be compiled with make command in src folder according to Programmers Guide.
